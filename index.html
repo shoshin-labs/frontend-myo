@@ -253,7 +253,13 @@
                 Every great project starts with a conversation.
                 Tell us what's on your mind—no commitment, just curiosity.
             </p>
-            <form class="contact-form" id="contactForm">
+            <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+                <input type="hidden" name="access_key" value="8b2362ed-44c6-4997-8016-370eda1414ab">
+                <input type="hidden" name="subject" value="New message from Myo Labs website">
+                <input type="hidden" name="redirect" value="https://shoshin-labs.github.io/frontend-myo/?thankyou=true">
+                <!-- Honeypot spam protection -->
+                <input type="checkbox" name="botcheck" class="hidden" style="display:none">
+
                 <div class="form-group reveal">
                     <label for="name">Your name</label>
                     <input type="text" id="name" name="name" required>

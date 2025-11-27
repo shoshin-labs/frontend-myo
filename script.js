@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTextReveal();
     initMagneticButtons();
     initDryBrushStreaks();
+    initThankYouMessage();
 });
 
 /**
@@ -94,15 +95,18 @@ function initNavScroll() {
 
 /**
  * Form interactions
- * Gentle feedback and submission handling
+ * Gentle feedback and focus animations
  */
 function initFormInteractions() {
     const form = document.getElementById('contactForm');
-    const inputs = form.querySelectorAll('input, textarea');
+    if (!form) return;
+
+    const inputs = form.querySelectorAll('input:not([type="hidden"]), textarea');
 
     // Add focus/blur animations
     inputs.forEach(input => {
         const formGroup = input.closest('.form-group');
+        if (!formGroup) return;
 
         input.addEventListener('focus', () => {
             formGroup.style.transform = 'translateX(4px)';
@@ -111,45 +115,6 @@ function initFormInteractions() {
         input.addEventListener('blur', () => {
             formGroup.style.transform = 'translateX(0)';
         });
-    });
-
-    // Form submission
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalContent = submitBtn.innerHTML;
-
-        // Show loading state
-        submitBtn.innerHTML = `
-            <span>Sending...</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
-                <circle cx="12" cy="12" r="10" stroke-dasharray="50" stroke-dashoffset="20"/>
-            </svg>
-        `;
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.7';
-
-        // Simulate form submission (replace with actual endpoint)
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Show success state
-        submitBtn.innerHTML = `
-            <span>Message Sent!</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        `;
-        submitBtn.style.background = '#7A8A72';
-        form.reset();
-
-        // Reset button after delay
-        setTimeout(() => {
-            submitBtn.innerHTML = originalContent;
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-            submitBtn.style.background = '';
-        }, 3000);
     });
 }
 
@@ -329,6 +294,42 @@ document.head.appendChild(progressStyle);
 
 // Initialize scroll progress
 initScrollProgress();
+
+/**
+ * Show thank you message after form submission
+ * Detects ?thankyou=true query parameter
+ */
+function initThankYouMessage() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('thankyou') !== 'true') return;
+
+    // Scroll to contact section
+    setTimeout(() => {
+        const contactSection = document.getElementById('contact');
+        if (contactSection) {
+            contactSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, 300);
+
+    // Replace form with thank you message
+    const form = document.getElementById('contactForm');
+    if (!form) return;
+
+    form.innerHTML = `
+        <div class="thank-you-message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="thank-you-icon">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="8 12 11 15 16 9" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3>Thank you!</h3>
+            <p>Your message has been sent. We'll be in touch soon.</p>
+        </div>
+    `;
+
+    // Clean up the URL (remove query param)
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+}
 
 /**
  * Generate randomized dry brush streaks for the ensō
