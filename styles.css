@@ -466,13 +466,13 @@ button, input, textarea {
 .ensō {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0 0 30px rgba(122, 138, 114, 0.25));
+    filter: drop-shadow(0 0 20px rgba(44, 48, 41, 0.15));
 }
 
 /* Base stroke styles for all segments */
 .ensō-s {
     fill: none;
-    stroke: var(--color-sage-dark);
+    stroke: var(--color-text);
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-dasharray: 60;
@@ -535,7 +535,7 @@ button, input, textarea {
 
 /* Ink pool at brush start */
 .ensō-ink-pool ellipse {
-    fill: var(--color-sage-dark);
+    fill: var(--color-text);
     opacity: 0;
     animation: inkPoolIn 0.12s ease-out forwards;
 }
@@ -556,7 +556,7 @@ button, input, textarea {
 
 /* Ink splatter droplets */
 .ensō-splatter circle {
-    fill: var(--color-sage-dark);
+    fill: var(--color-text);
     opacity: 0;
     animation: splatIn 0.1s ease-out forwards;
 }
