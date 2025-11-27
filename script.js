@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    initTextSplit();
     initRevealAnimations();
     initSmoothScroll();
     initNavScroll();
@@ -14,7 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
     initMagneticButtons();
     initDryBrushStreaks();
     initThankYouMessage();
+    initParallaxScroll();
 });
+
+/**
+ * Split hero title text into individual characters for animation
+ */
+function initTextSplit() {
+    const titleSpans = document.querySelectorAll('.hero-title span');
+
+    titleSpans.forEach((span, spanIndex) => {
+        const text = span.textContent;
+        span.innerHTML = '';
+        span.classList.add('split-text');
+
+        // Split into characters
+        text.split('').forEach((char, charIndex) => {
+            const charSpan = document.createElement('span');
+            charSpan.classList.add('char');
+            charSpan.textContent = char === ' ' ? '\u00A0' : char;
+            // Stagger delay based on character position
+            const delay = 0.1 + (spanIndex * 0.25) + (charIndex * 0.025);
+            charSpan.style.animationDelay = `${delay}s`;
+            span.appendChild(charSpan);
+        });
+    });
+}
 
 /**
  * Reveal animations on scroll
@@ -80,10 +106,10 @@ function initNavScroll() {
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 if (lastScroll > 100) {
-                    nav.style.background = 'rgba(250, 248, 245, 0.95)';
+              //      nav.style.background = 'rgba(250, 248, 245, 0.95)';
                     nav.style.boxShadow = '0 1px 20px rgba(0, 0, 0, 0.05)';
                 } else {
-                    nav.style.background = 'rgba(250, 248, 245, 0.8)';
+                  //  nav.style.background = 'rgba(250, 248, 245, 0.8)';
                     nav.style.boxShadow = 'none';
                 }
                 ticking = false;
@@ -171,13 +197,17 @@ document.head.appendChild(style);
 /**
  * Ensō interaction
  * Responds to mouse proximity with subtle scaling
+ * Redraws when scrolling back to hero
  */
 function initEnsōInteraction() {
     const zenCircle = document.querySelector('.hero-visual .zen-circle');
-    if (!zenCircle) return;
+    const heroSection = document.querySelector('.hero');
+    if (!zenCircle || !heroSection) return;
 
     let isHovering = false;
+    let hasLeftHero = false;
 
+    // Mouse interaction
     zenCircle.addEventListener('mouseenter', () => {
         isHovering = true;
         zenCircle.style.animationPlayState = 'paused';
@@ -207,6 +237,62 @@ function initEnsōInteraction() {
     zenCircle.addEventListener('mouseleave', () => {
         zenCircle.style.transform = '';
     });
+
+    // Scroll-triggered redraw
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                hasLeftHero = true;
+            } else if (hasLeftHero && entry.isIntersecting) {
+                // User scrolled back to hero - redraw the ensō
+                redrawEnsō();
+                hasLeftHero = false;
+            }
+        });
+    }, { threshold: 0.3 });
+
+    observer.observe(heroSection);
+}
+
+/**
+ * Redraw the ensō animation
+ */
+function redrawEnsō() {
+    const strokes = document.querySelectorAll('.ensō-s');
+    const inkPool = document.querySelectorAll('.ensō-ink-pool ellipse');
+    const splatter = document.querySelectorAll('.ensō-splatter circle');
+    const dryStreaks = document.querySelectorAll('.dry-streak');
+
+    // Reset all stroke animations
+    strokes.forEach(stroke => {
+        stroke.style.animation = 'none';
+        stroke.offsetHeight; // Trigger reflow
+        stroke.style.animation = '';
+    });
+
+    // Reset ink pool
+    inkPool.forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
+    });
+
+    // Reset splatter
+    splatter.forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
+    });
+
+    // Regenerate dry streaks
+    const container = document.querySelector('.ensō-dry-streaks');
+    if (container) {
+        container.innerHTML = '';
+        // Re-run the dry brush generation
+        if (typeof initDryBrushStreaks === 'function') {
+            initDryBrushStreaks();
+        }
+    }
 }
 
 /**
@@ -247,6 +333,28 @@ function initMagneticButtons() {
 
         btn.addEventListener('mouseleave', () => {
             btn.style.transform = '';
+        });
+    });
+
+    // Magnetic service cards
+    const cards = document.querySelectorAll('.service-card');
+
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
         });
     });
 }
@@ -294,6 +402,51 @@ document.head.appendChild(progressStyle);
 
 // Initialize scroll progress
 initScrollProgress();
+
+/**
+ * Parallax scroll effect
+ * Different elements move at different speeds for depth
+ */
+function initParallaxScroll() {
+    const heroContent = document.querySelector('.hero-content');
+    const heroVisual = document.querySelector('.hero-visual');
+    const zenCircle = document.querySelector('.zen-circle');
+    const orbs = document.querySelectorAll('.orb');
+
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrollY = window.pageYOffset;
+                const windowHeight = window.innerHeight;
+
+                // Only apply parallax when in or near the hero section
+                if (scrollY < windowHeight * 1.5) {
+                    // Hero content moves up slower (sticky feel)
+                    if (heroContent) {
+                        heroContent.style.transform = `translateY(${scrollY * 0.15}px)`;
+                        heroContent.style.opacity = 1 - (scrollY / windowHeight) * 0.8;
+                    }
+
+                    // Ensō moves up faster (foreground feel)
+                    if (zenCircle) {
+                        zenCircle.style.transform = `translateY(${scrollY * -0.1}px)`;
+                    }
+
+                    // Orbs move at different rates for depth
+                    orbs.forEach((orb, index) => {
+                        const speed = 0.05 + (index * 0.03);
+                        orb.style.transform = `translateY(${scrollY * speed}px)`;
+                    });
+                }
+
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+}
 
 /**
  * Show thank you message after form submission
