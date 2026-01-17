@@ -250,6 +250,7 @@ a {
 
 .hero-line[data-delay="0"] span { animation-delay: 0.2s; }
 .hero-line[data-delay="1"] span { animation-delay: 0.35s; }
+.hero-line[data-delay="2"] span { animation-delay: 0.5s; }
 
 @keyframes slideUp {
     to {
