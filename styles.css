@@ -10,8 +10,8 @@
     --color-bg-card: #161616;
     
     --color-text: #FAFAFA;
-    --color-text-dim: #888888;
-    --color-text-muted: #555555;
+    --color-text-dim: #AAAAAA;
+    --color-text-muted: #777777;
     
     --color-accent: #FF3D00;
     --color-accent-dim: #CC3100;
@@ -138,7 +138,7 @@ a {
 }
 
 .logo-labs {
-    color: #888888;
+    color: var(--color-text-dim);
     font-weight: 500;
 }
 
@@ -832,7 +832,7 @@ section {
 }
 
 .dim {
-    color: #888888;
+    color: var(--color-text-dim);
 }
 
 /* ============================================
@@ -1017,6 +1017,7 @@ section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-sm);
+    margin-bottom: var(--space-md); 
 }
 
 .ownership-features li {
