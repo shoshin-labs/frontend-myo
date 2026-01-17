@@ -33,7 +33,7 @@
             <a href="#work">Work</a>
             <a href="#how">How</a>
             <a href="#why">Why</a>
-            <a href="#contact" class="nav-cta">Talk to us</a>
+            <a href="#contact" class="nav-cta">Have a word</a>
         </div>
     </nav>
 
@@ -49,7 +49,7 @@
                 </div>
             </div>
             <p class="hero-sub">
-                We don't do pitch decks or account managers. We do hard engineering for people who value craft over ceremony.
+                We don't do pitch decks or account managers. We do hard engineering and painless deployments for people and teams who value craft and function over meetings and ceremony.
             </p>
             <div class="hero-cta">
                 <a href="#contact" class="btn btn-primary">
@@ -176,14 +176,17 @@
                         <span class="code-title">workflow.ts</span>
                     </div>
                     <pre class="code-content"><code><span class="code-keyword">const</span> <span class="code-var">project</span> = {
-  exploration: <span class="code-string">"until we're done"</span>,
-  scope: <span class="code-string">"tight"</span>,
-  communication: <span class="code-string">"as often as you need"</span>,
-  blackBoxes: <span class="code-number">0</span>,
-  vendorLockin: <span class="code-boolean">false</span>,
+  <span class="code-function">exploration</span>: Discuss.<span class="code-var">UNTIL_READY</span>,
+  <span class="code-function">scope</span>?: <span class="code-string">"tight"</span>, // remove creep
+  <span class="code-function">communication</span>: [<span class="code-string">"weekly"</span>, <span class="code-string">"daily"</span>, <span class="code-string">"whenever you need"</span>],
+  <span class="code-function">blackBoxes</span>: <span class="code-number">0</span>,
+  <span class="code-function">vendorLockin</span>: <span class="code-boolean">false</span>,
   
   <span class="code-function">ship</span>: () => <span class="code-string">"fast"</span>,
-  <span class="code-function">iterate</span>: () => <span class="code-string">"faster"</span>
+  <span class="code-function">iterate</span>: () => <span class="code-string">"faster"</span>,
+  
+  <span class="code-function">satisfaction</span>: Guarantee.<span class="code-var">FULL</span>,
+  <span class="code-function">walkAway</span>: <span class="code-keyword">async</span> () => <span class="code-keyword">await</span> fetch(<span class="code-string">"/bye"</span>)
 };</code></pre>
                 </div>
             </div>
