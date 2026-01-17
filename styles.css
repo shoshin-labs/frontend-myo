@@ -53,6 +53,7 @@
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    overflow-x: hidden;
 }
 
 body {
@@ -74,6 +75,98 @@ body {
 a {
     color: inherit;
     text-decoration: none;
+}
+
+/* ============================================
+   Loading Screen
+   ============================================ */
+
+.loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader-dot {
+    width: 16px;
+    height: 16px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    animation: loaderPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes loaderPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 61, 0, 0.7);
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+        box-shadow: 0 0 0 20px rgba(255, 61, 0, 0);
+    }
+}
+
+/* Hide content until loaded */
+body:not(.loaded) .hero-line span,
+body:not(.loaded) .hero-sub,
+body:not(.loaded) .hero-cta,
+body:not(.loaded) .scroll-indicator {
+    animation: none !important;
+    opacity: 0 !important;
+}
+
+body:not(.loaded) .hero-line .strike::after,
+body:not(.loaded) .hero-line .highlight::before {
+    animation: none !important;
+    width: 0 !important;
+    transform: scaleY(0) !important;
+}
+
+/* Restart animations when loaded */
+body.loaded .hero-line span {
+    animation: slideUp 0.8s var(--ease-out) forwards;
+}
+
+body.loaded .hero-line[data-delay="0"] span { animation-delay: 0.1s; }
+body.loaded .hero-line[data-delay="1"] span { animation-delay: 0.25s; }
+body.loaded .hero-line[data-delay="2"] span { animation-delay: 0.4s; }
+
+body.loaded .hero-line .strike::after {
+    animation: strikethrough 0.6s var(--ease-out) forwards;
+    animation-delay: 0.6s;
+}
+
+body.loaded .hero-line .highlight::before {
+    animation: growBar 0.4s var(--ease-out) forwards;
+    animation-delay: 0.9s;
+}
+
+body.loaded .hero-sub {
+    animation: fadeIn 0.6s var(--ease-out) forwards;
+    animation-delay: 0.9s;
+}
+
+body.loaded .hero-cta {
+    animation: fadeIn 0.6s var(--ease-out) forwards;
+    animation-delay: 1.1s;
+}
+
+body.loaded .scroll-indicator {
+    animation: fadeIn 0.6s var(--ease-out) forwards;
+    animation-delay: 1.4s;
 }
 
 /* ============================================
@@ -447,6 +540,14 @@ section {
     color: var(--color-text);
 }
 
+.section-sub {
+    font-size: 1rem;
+    color: var(--color-text-dim);
+    margin-top: var(--space-sm);
+    line-height: 1.7;
+    max-width: 100%;
+}
+
 /* ============================================
    Marquee
    ============================================ */
@@ -464,7 +565,7 @@ section {
 .marquee-track {
     display: flex;
     gap: var(--space-xl);
-    animation: marquee 30s linear infinite;
+    animation: marquee 60s linear infinite;
     white-space: nowrap;
 }
 
@@ -1312,11 +1413,17 @@ section {
     }
     
     .nav {
-        padding: var(--space-sm) var(--space-md);
+        padding: var(--space-sm) var(--space-sm);
     }
     
     .nav-links a:not(.nav-cta) {
         display: none;
+    }
+    
+    .nav-cta {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.75rem;
+        white-space: nowrap;
     }
     
     section {
@@ -1327,8 +1434,36 @@ section {
         padding: var(--space-3xl) var(--space-md);
     }
     
+    .hero-content {
+        max-width: 100%;
+    }
+    
     .scroll-indicator {
         display: none;
+    }
+    
+    /* How section - tighter layout */
+    .how-step {
+        padding-left: 3rem;
+    }
+    
+    .how-step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+    
+    .how-step-line {
+        left: 13px;
+        top: 44px;
+    }
+    
+    .how-step h3 {
+        font-size: 1.1rem;
+    }
+    
+    .how-step p {
+        font-size: 0.9rem;
     }
     
     .footer-content {
@@ -1356,22 +1491,219 @@ section {
     }
     
     .ai-bar {
-        padding: var(--space-md);
+        padding: var(--space-md) var(--space-md);
+    }
+    
+    .code-block {
+        font-size: 0.75rem;
+    }
+    
+    .code-content {
+        padding: var(--space-sm);
+        font-size: 0.7rem;
+        line-height: 1.6;
+    }
+    
+    .ownership-graph {
+        height: 300px;
     }
 }
 
 @media (max-width: 480px) {
-    .hero-line span {
-        font-size: 2rem;
+    :root {
+        --space-sm: 0.75rem;
+        --space-md: 1rem;
     }
     
-    .contact-email {
+    .nav {
+        padding: var(--space-xs) var(--space-sm);
+    }
+    
+    .logo-text {
         font-size: 1.25rem;
     }
     
-    .contact-email svg {
+    .nav-cta {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+    }
+    
+    section {
+        padding: var(--space-xl) var(--space-sm);
+    }
+    
+    .hero {
+        padding: var(--space-2xl) var(--space-sm);
+    }
+    
+    .hero-line span {
+        font-size: 1.75rem;
+    }
+    
+    .hero-sub {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    
+    .btn {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.8rem;
+    }
+    
+    .section-tag {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+    }
+    
+    .section-title {
+        font-size: 1.35rem;
+    }
+    
+    .section-sub {
+        font-size: 0.9rem;
+    }
+    
+    .work-card {
+        padding: var(--space-md);
+    }
+    
+    .work-card h3 {
+        font-size: 1.15rem;
+    }
+    
+    .work-card p {
+        font-size: 0.85rem;
+    }
+    
+    /* How section - compact for small screens */
+    .how-step {
+        padding-left: 2.5rem;
+        padding-top: var(--space-md);
+        padding-bottom: var(--space-md);
+    }
+    
+    .how-step-number {
         width: 24px;
         height: 24px;
+        font-size: 0.7rem;
+    }
+    
+    .how-step-line {
+        left: 11px;
+        top: 40px;
+    }
+    
+    .how-step h3 {
+        font-size: 1rem;
+    }
+    
+    .how-step p {
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+    
+    .code-content {
+        font-size: 0.65rem;
+        padding: var(--space-xs);
+        overflow-x: auto;
+    }
+    
+    .why-item {
+        padding: var(--space-md);
+    }
+    
+    .why-item h3 {
+        font-size: 1rem;
+    }
+    
+    .why-item p {
+        font-size: 0.85rem;
+    }
+    
+    .why-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .ai-bar-content {
+        gap: var(--space-sm);
+    }
+    
+    .ai-badge {
+        padding: 4px 8px;
+    }
+    
+    .ai-badge span {
+        font-size: 0.6rem;
+    }
+    
+    .ai-statement {
+        font-size: 0.85rem;
+    }
+    
+    .ownership-text h2 {
+        font-size: 1.35rem;
+    }
+    
+    .ownership-text > p {
+        font-size: 0.9rem;
+    }
+    
+    .ownership-features li {
+        font-size: 0.85rem;
+    }
+    
+    .ownership-ps {
+        font-size: 0.8rem;
+    }
+    
+    .ownership-graph {
+        height: 250px;
+    }
+    
+    .contact-title {
+        font-size: 1.5rem;
+    }
+    
+    .contact-sub {
+        font-size: 0.95rem;
+    }
+    
+    .contact-email {
+        font-size: 1.1rem;
+        word-break: break-all;
+    }
+    
+    .contact-email svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+    
+    .difference-content .statement-main {
+        font-size: 1.5rem;
+    }
+    
+    .difference-content .statement-contrast {
+        font-size: 0.9rem;
+    }
+    
+    .difference-content .statement-label {
+        font-size: 0.65rem;
+    }
+    
+    .footer {
+        padding: var(--space-md);
+    }
+    
+    .footer-links {
+        gap: var(--space-md);
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .footer-links a {
+        font-size: 0.75rem;
     }
 }
 

@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize everything behind the loader
     initGridCanvas();
     initRevealAnimations();
     initSmoothScroll();
@@ -15,7 +16,50 @@ document.addEventListener('DOMContentLoaded', () => {
     initHowSteps();
     initStatementAnimation();
     initOwnershipGraph();
+    
+    // Hide loader once page is ready
+    hideLoader();
 });
+
+/**
+ * Hide loader and reveal content
+ */
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    if (!loader) {
+        document.body.classList.add('loaded');
+        return;
+    }
+    
+    // Wait for fonts and critical resources
+    const minLoadTime = 400; // Minimum time to show loader
+    const startTime = performance.now();
+    
+    // Check if fonts are ready
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+            const elapsed = performance.now() - startTime;
+            const remaining = Math.max(0, minLoadTime - elapsed);
+            
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                document.body.classList.add('loaded');
+                
+                // Remove loader from DOM after transition
+                setTimeout(() => {
+                    loader.remove();
+                }, 400);
+            }, remaining);
+        });
+    } else {
+        // Fallback for browsers without font loading API
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            document.body.classList.add('loaded');
+            setTimeout(() => loader.remove(), 400);
+        }, minLoadTime);
+    }
+}
 
 /**
  * Cursor-reactive grid canvas
