@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initGlitchEffects();
     initScrollVelocity();
     initWorkCardHovers();
-    initStatsCounter();
     initHowSteps();
 });
 
@@ -359,7 +358,6 @@ function initScrollVelocity() {
                 
                 // Apply effects based on velocity
                 const skewAmount = Math.min(Math.max(velocity * 20, -5), 5);
-                const scaleAmount = 1 - Math.abs(velocity) * 0.1;
                 
                 // Apply to work cards
                 workCards.forEach(card => {
@@ -400,7 +398,7 @@ function initScrollVelocity() {
  * Work card hover effects
  */
 function initWorkCardHovers() {
-    const cards = document.querySelectorAll('.work-card, .why-item, .server');
+    const cards = document.querySelectorAll('.work-card, .why-item, .ownership-item');
     
     cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
@@ -423,145 +421,13 @@ function initWorkCardHovers() {
 }
 
 /**
- * Cursor trail effect (optional - uncomment to enable)
- */
-/*
-function initCursorTrail() {
-    const trailLength = 20;
-    const trails = [];
-    
-    for (let i = 0; i < trailLength; i++) {
-        const trail = document.createElement('div');
-        trail.style.cssText = `
-            position: fixed;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 61, 0, ${1 - i / trailLength});
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s ease-out;
-        `;
-        document.body.appendChild(trail);
-        trails.push({ el: trail, x: 0, y: 0 });
-    }
-    
-    let mouseX = 0;
-    let mouseY = 0;
-    
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
-    
-    function animateTrails() {
-        let x = mouseX;
-        let y = mouseY;
-        
-        trails.forEach((trail, index) => {
-            const nextX = x;
-            const nextY = y;
-            
-            trail.x += (nextX - trail.x) * 0.3;
-            trail.y += (nextY - trail.y) * 0.3;
-            
-            trail.el.style.left = trail.x + 'px';
-            trail.el.style.top = trail.y + 'px';
-            
-            x = trail.x;
-            y = trail.y;
-        });
-        
-        requestAnimationFrame(animateTrails);
-    }
-    
-    animateTrails();
-}
-*/
-
-/**
- * Typing effect for hero subtitle (optional)
- */
-/*
-function initTypingEffect() {
-    const heroSub = document.querySelector('.hero-sub');
-    if (!heroSub) return;
-    
-    const text = heroSub.textContent;
-    heroSub.textContent = '';
-    heroSub.style.opacity = '1';
-    
-    let i = 0;
-    const typeSpeed = 30;
-    
-    function type() {
-        if (i < text.length) {
-            heroSub.textContent += text.charAt(i);
-            i++;
-            setTimeout(type, typeSpeed);
-        }
-    }
-    
-    // Start after hero animation
-    setTimeout(type, 1500);
-}
-*/
-
-/**
- * Animated stats counter
- */
-function initStatsCounter() {
-    const stats = document.querySelectorAll('.stat-number[data-target]');
-    if (!stats.length) return;
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const el = entry.target;
-                const target = parseInt(el.getAttribute('data-target'));
-                animateCounter(el, target);
-                observer.unobserve(el);
-            }
-        });
-    }, { threshold: 0.5 });
-    
-    stats.forEach(stat => observer.observe(stat));
-}
-
-function animateCounter(el, target) {
-    const duration = 2000;
-    const start = 0;
-    const startTime = performance.now();
-    
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const current = Math.floor(start + (target - start) * easeOutQuart);
-        
-        el.textContent = current;
-        
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        } else {
-            el.textContent = target;
-        }
-    }
-    
-    requestAnimationFrame(update);
-}
-
-/**
  * How section step animations
  */
 function initHowSteps() {
     const steps = document.querySelectorAll('.how-step');
     if (!steps.length) return;
     
-    steps.forEach((step, index) => {
+    steps.forEach((step) => {
         step.addEventListener('mouseenter', () => {
             // Pulse the step number
             const number = step.querySelector('.how-step-number');
