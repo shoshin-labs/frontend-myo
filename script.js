@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollVelocity();
     initWorkCardHovers();
     initHowSteps();
+    initStatementAnimation();
 });
 
 /**
@@ -150,7 +151,7 @@ function initRevealAnimations() {
     
     // Add reveal class to elements
     const elementsToReveal = document.querySelectorAll(
-        '.work-card, .how-step, .why-item, .why-statement, .ownership-text, .ownership-visual, .contact-content > *'
+        '.work-card, .how-step, .why-item, .ownership-text, .ownership-visual, .contact-content > *'
     );
     
     elementsToReveal.forEach((el, index) => {
@@ -449,6 +450,28 @@ function initHowSteps() {
             }
         });
     });
+}
+
+/**
+ * Statement animation - "The difference" section
+ */
+function initStatementAnimation() {
+    const statement = document.querySelector('[data-statement-animate]');
+    if (!statement) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                statement.classList.add('animate-in');
+                observer.unobserve(statement);
+            }
+        });
+    }, {
+        threshold: 0.3,
+        rootMargin: '0px 0px -100px 0px'
+    });
+    
+    observer.observe(statement);
 }
 
 /**

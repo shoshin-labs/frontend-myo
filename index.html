@@ -164,7 +164,7 @@
                         <div class="how-step-line-end"></div>
                     </div>
                     <h3>Make ourselves redundant</h3>
-                    <p>We document everything. We train your team. Our goal is for you to never need us again. That's the opposite of how most shops operate.</p>
+                    <p>We document everything. We train your team. Our goal is for you to never need us again. That's not how most shops operate.</p>
                 </div>
             </div>
             <div class="how-visual">
@@ -176,8 +176,9 @@
                         <span class="code-title">workflow.ts</span>
                     </div>
                     <pre class="code-content"><code><span class="code-keyword">const</span> <span class="code-var">project</span> = {
+  exploration: <span class="code-string">"until we're done"</span>,
   scope: <span class="code-string">"tight"</span>,
-  communication: <span class="code-string">"daily"</span>,
+  communication: <span class="code-string">"as often as you need"</span>,
   blackBoxes: <span class="code-number">0</span>,
   vendorLockin: <span class="code-boolean">false</span>,
   
@@ -253,13 +254,32 @@
                     <p>Built for where you're going, not just where you are. Growth shouldn't break things.</p>
                 </div>
             </div>
-            <div class="why-statement">
-                <div class="statement-text">
-                    <span class="statement-label">The difference</span>
-                    <p class="statement-contrast"><span class="dim">They sell you a dependency.</span></p>
-                    <p class="statement-main">We sell you freedom.</p>
-                </div>
             </div>
+    </section>
+
+    <!-- The Difference Statement -->
+    <section class="difference-section" data-statement-animate>
+        <div class="difference-geo">
+            <svg class="geo-lines" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+                <!-- Outer square that breaks apart -->
+                <rect class="geo-cage geo-cage-1" x="50" y="50" width="300" height="300" fill="none" stroke="currentColor" stroke-width="1"/>
+                <rect class="geo-cage geo-cage-2" x="80" y="80" width="240" height="240" fill="none" stroke="currentColor" stroke-width="1"/>
+                <rect class="geo-cage geo-cage-3" x="110" y="110" width="180" height="180" fill="none" stroke="currentColor" stroke-width="1"/>
+                <!-- Center diamond -->
+                <polygon class="geo-diamond" points="200,140 260,200 200,260 140,200" fill="none" stroke="currentColor" stroke-width="2"/>
+                <!-- Break lines -->
+                <line class="geo-break geo-break-1" x1="200" y1="50" x2="200" y2="0" stroke="currentColor" stroke-width="2"/>
+                <line class="geo-break geo-break-2" x1="350" y1="200" x2="400" y2="200" stroke="currentColor" stroke-width="2"/>
+                <line class="geo-break geo-break-3" x1="200" y1="350" x2="200" y2="400" stroke="currentColor" stroke-width="2"/>
+                <line class="geo-break geo-break-4" x1="50" y1="200" x2="0" y2="200" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+        <div class="difference-content">
+            <span class="statement-label">The difference</span>
+            <p class="statement-contrast">
+                <span class="statement-strike">They sell you a dependency.</span>
+            </p>
+            <p class="statement-main">We sell you freedom.</p>
         </div>
     </section>
 
@@ -275,7 +295,7 @@
                     <strong>That's a business model built on trapping you.</strong>
                 </p>
                 <p class="ownership-contrast">
-                    We do the opposite:
+                    We do it differently:
                 </p>
                 <ul class="ownership-features">
                     <li>
