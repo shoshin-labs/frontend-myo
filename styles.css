@@ -137,6 +137,11 @@ a {
     color: var(--color-text);
 }
 
+.logo-labs {
+    color: #888888;
+    font-weight: 500;
+}
+
 .logo-dot {
     width: 8px;
     height: 8px;
