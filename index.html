@@ -253,20 +253,36 @@
                     <h3>Systems that scale</h3>
                     <p>Built for where you're going, not just where you are. Growth shouldn't break things.</p>
                 </div>
+                <div class="why-item">
+                    <div class="why-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                        </svg>
+                    </div>
+                    <h3>Yours from day one</h3>
+                    <p>Every line of code, every credential, every deployment. You own it all. Fire us whenever—nothing breaks.</p>
+                </div>
+                <div class="why-item">
+                    <div class="why-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="8" r="4"/>
+                            <circle cx="4" cy="18" r="2"/>
+                            <circle cx="9" cy="19" r="2"/>
+                            <circle cx="15" cy="19" r="2"/>
+                            <circle cx="20" cy="18" r="2"/>
+                            <circle cx="12" cy="16" r="2"/>
+                        </svg>
+                    </div>
+                    <h3>One human. Five agents.</h3>
+                    <p>Our engineers work alongside AI teammates. More coverage, faster iteration, fewer blind spots.</p>
+                </div>
             </div>
             </div>
     </section>
 
     <!-- The Difference Statement -->
     <section class="difference-section" data-statement-animate>
-        <div class="difference-geo">
-            <svg class="geo-lines" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
-                <rect class="geo-cage geo-cage-1" x="50" y="50" width="300" height="300" fill="none" stroke="currentColor" stroke-width="1"/>
-                <rect class="geo-cage geo-cage-2" x="90" y="90" width="220" height="220" fill="none" stroke="currentColor" stroke-width="1"/>
-                <rect class="geo-cage geo-cage-3" x="130" y="130" width="140" height="140" fill="none" stroke="currentColor" stroke-width="1"/>
-                <polygon class="geo-diamond" points="200,160 240,200 200,240 160,200" fill="none" stroke="currentColor" stroke-width="1"/>
-            </svg>
-        </div>
+        <canvas class="difference-canvas" id="differenceCanvas"></canvas>
         <div class="difference-content">
             <span class="statement-label">The difference</span>
             <p class="statement-contrast">
@@ -317,25 +333,11 @@
                     </li>
                 </ul>
                 <p class="ownership-ps">
-                    <span class="ps-label">P.S.</span> Don't want to look after it? You can pay us to.
+                    <span class="ps-label">P.S.</span> Really don't want to look after, or don't have the skills or people? We can help. Just ask.
                 </p>
             </div>
             <div class="ownership-visual">
-                <div class="ownership-diagram">
-                    <div class="ownership-node ownership-you">
-                        <span>YOU</span>
-                    </div>
-                    <div class="ownership-arrows">
-                        <div class="ownership-arrow"></div>
-                        <div class="ownership-arrow"></div>
-                        <div class="ownership-arrow"></div>
-                    </div>
-                    <div class="ownership-items">
-                        <div class="ownership-item">CODE</div>
-                        <div class="ownership-item">INFRA</div>
-                        <div class="ownership-item">DATA</div>
-                    </div>
-                </div>
+                <div id="ownership-graph" class="ownership-graph"></div>
             </div>
         </div>
     </section>
@@ -382,6 +384,7 @@
         </div>
     </footer>
 
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
