@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initWorkCardHovers();
     initHowSteps();
     initStatementAnimation();
+    initOwnershipGraph();
 });
 
 /**
@@ -453,11 +454,201 @@ function initHowSteps() {
 }
 
 /**
+ * Ownership D3.js force graph
+ */
+function initOwnershipGraph() {
+    const container = document.getElementById('ownership-graph');
+    if (!container || typeof d3 === 'undefined') return;
+    
+    const width = container.clientWidth || 400;
+    const height = container.clientHeight || 400;
+    
+    // Clear any existing content
+    container.innerHTML = '';
+    
+    const svg = d3.select(container)
+        .append('svg')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+    
+    // Define nodes
+    const nodes = [
+        { id: 'you', label: 'YOU', type: 'center', radius: 45 },
+        { id: 'code', label: 'CODE', type: 'owned', radius: 32 },
+        { id: 'infra', label: 'INFRA', type: 'owned', radius: 32 },
+        { id: 'data', label: 'DATA', type: 'owned', radius: 32 },
+        { id: 'docs', label: 'DOCS', type: 'owned', radius: 28 },
+        { id: 'keys', label: 'KEYS', type: 'owned', radius: 28 }
+    ];
+    
+    // Define links (all connect to center)
+    const links = [
+        { source: 'you', target: 'code' },
+        { source: 'you', target: 'infra' },
+        { source: 'you', target: 'data' },
+        { source: 'you', target: 'docs' },
+        { source: 'you', target: 'keys' }
+    ];
+    
+    // Create force simulation
+    const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(120).strength(0.5))
+        .force('charge', d3.forceManyBody().strength(-300))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(d => d.radius + 20));
+    
+    // Pin the center node
+    const centerNode = nodes.find(n => n.id === 'you');
+    centerNode.fx = width / 2;
+    centerNode.fy = height / 2;
+    
+    // Create gradient for links
+    const defs = svg.append('defs');
+    const gradient = defs.append('linearGradient')
+        .attr('id', 'link-gradient')
+        .attr('gradientUnits', 'userSpaceOnUse');
+    gradient.append('stop').attr('offset', '0%').attr('stop-color', '#FF3D00').attr('stop-opacity', 0.8);
+    gradient.append('stop').attr('offset', '100%').attr('stop-color', '#FF3D00').attr('stop-opacity', 0.2);
+    
+    // Draw links
+    const link = svg.append('g')
+        .selectAll('line')
+        .data(links)
+        .join('line')
+        .attr('stroke', '#FF3D00')
+        .attr('stroke-opacity', 0.3)
+        .attr('stroke-width', 2);
+    
+    // Animated particles along links
+    const particles = svg.append('g').attr('class', 'particles');
+    
+    // Draw nodes
+    const node = svg.append('g')
+        .selectAll('g')
+        .data(nodes)
+        .join('g')
+        .attr('class', d => `node node-${d.type}`)
+        .style('cursor', 'pointer');
+    
+    // Node circles
+    node.append('circle')
+        .attr('r', d => d.radius)
+        .attr('fill', d => d.type === 'center' ? 'rgba(10, 10, 10, 0.9)' : 'rgba(20, 20, 20, 0.9)')
+        .attr('stroke', d => d.type === 'center' ? '#FF3D00' : 'rgba(255, 255, 255, 0.2)')
+        .attr('stroke-width', d => d.type === 'center' ? 2 : 1);
+    
+    // Pulse ring for center
+    node.filter(d => d.type === 'center')
+        .append('circle')
+        .attr('r', d => d.radius + 10)
+        .attr('fill', 'none')
+        .attr('stroke', '#FF3D00')
+        .attr('stroke-opacity', 0.3)
+        .attr('class', 'pulse-ring');
+    
+    // Node labels
+    node.append('text')
+        .text(d => d.label)
+        .attr('text-anchor', 'middle')
+        .attr('dy', '0.35em')
+        .attr('fill', d => d.type === 'center' ? '#FF3D00' : 'rgba(255, 255, 255, 0.7)')
+        .attr('font-family', 'Space Grotesk, sans-serif')
+        .attr('font-size', d => d.type === 'center' ? '16px' : '11px')
+        .attr('font-weight', d => d.type === 'center' ? '700' : '500')
+        .attr('letter-spacing', '0.05em');
+    
+    // Update positions on tick
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+        
+        node.attr('transform', d => `translate(${d.x}, ${d.y})`);
+    });
+    
+    // Animate particles along links
+    function animateParticles() {
+        links.forEach((link, i) => {
+            const particle = particles.append('circle')
+                .attr('r', 3)
+                .attr('fill', '#FF3D00')
+                .attr('opacity', 0.8);
+            
+            const source = nodes.find(n => n.id === link.source.id || n.id === link.source);
+            const target = nodes.find(n => n.id === link.target.id || n.id === link.target);
+            
+            if (source && target) {
+                particle
+                    .attr('cx', source.x || width/2)
+                    .attr('cy', source.y || height/2)
+                    .transition()
+                    .duration(1500)
+                    .delay(i * 300)
+                    .ease(d3.easeQuadOut)
+                    .attr('cx', target.x || width/2)
+                    .attr('cy', target.y || height/2)
+                    .attr('opacity', 0)
+                    .remove();
+            }
+        });
+    }
+    
+    // Start particle animation loop
+    animateParticles();
+    setInterval(animateParticles, 2500);
+    
+    // Hover effects
+    node.on('mouseenter', function(event, d) {
+        d3.select(this).select('circle')
+            .transition()
+            .duration(200)
+            .attr('stroke', '#FF3D00')
+            .attr('stroke-width', 2);
+        
+        d3.select(this).select('text')
+            .transition()
+            .duration(200)
+            .attr('fill', '#ffffff');
+    })
+    .on('mouseleave', function(event, d) {
+        d3.select(this).select('circle')
+            .transition()
+            .duration(200)
+            .attr('stroke', d.type === 'center' ? '#FF3D00' : 'rgba(255, 255, 255, 0.2)')
+            .attr('stroke-width', d.type === 'center' ? 2 : 1);
+        
+        d3.select(this).select('text')
+            .transition()
+            .duration(200)
+            .attr('fill', d.type === 'center' ? '#FF3D00' : 'rgba(255, 255, 255, 0.7)');
+    });
+    
+    // Add pulse animation via CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        .pulse-ring {
+            animation: ownership-pulse 2s ease-out infinite;
+            transform-origin: center;
+        }
+        @keyframes ownership-pulse {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+/**
  * Statement animation - "The difference" section
  */
 function initStatementAnimation() {
     const statement = document.querySelector('[data-statement-animate]');
     if (!statement) return;
+    
+    // Initialize the flowing lines canvas
+    initDifferenceCanvas();
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -472,6 +663,98 @@ function initStatementAnimation() {
     });
     
     observer.observe(statement);
+}
+
+/**
+ * Flowing orange lines canvas animation
+ */
+function initDifferenceCanvas() {
+    const canvas = document.getElementById('differenceCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const section = canvas.parentElement;
+    let width, height;
+    let animationId;
+    let time = 0;
+    
+    // Line configuration
+    const lines = [];
+    const lineCount = 7;
+    
+    function resize() {
+        const rect = section.getBoundingClientRect();
+        width = canvas.width = rect.width;
+        height = canvas.height = rect.height;
+        
+        // Reinitialize lines on resize
+        initLines();
+    }
+    
+    function initLines() {
+        lines.length = 0;
+        for (let i = 0; i < lineCount; i++) {
+            lines.push({
+                baseY: height * (0.2 + (i * 0.1)),
+                amplitude: 40 + Math.random() * 50,
+                frequency: 0.002 + Math.random() * 0.002,
+                phase: Math.random() * Math.PI * 2,
+                speed: 0.4 + Math.random() * 0.4,
+                opacity: 0.15 + Math.random() * 0.2
+            });
+        }
+    }
+    
+    function drawLine(line, t) {
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(255, 61, 0, ${line.opacity})`;
+        ctx.lineWidth = 2;
+        
+        for (let x = 0; x <= width; x += 3) {
+            const y = line.baseY + 
+                Math.sin(x * line.frequency + t * line.speed + line.phase) * line.amplitude +
+                Math.sin(x * line.frequency * 0.5 + t * line.speed * 0.7) * (line.amplitude * 0.5);
+            
+            if (x === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        
+        ctx.stroke();
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        
+        time += 0.016; // ~60fps
+        
+        lines.forEach(line => {
+            drawLine(line, time);
+        });
+        
+        animationId = requestAnimationFrame(animate);
+    }
+    
+    // Check if section is in view to pause/resume animation
+    const visibilityObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (!animationId) animate();
+            } else {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            }
+        });
+    }, { threshold: 0 });
+    
+    visibilityObserver.observe(section);
+    
+    window.addEventListener('resize', resize);
+    resize();
 }
 
 /**
