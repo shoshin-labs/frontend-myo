@@ -1,60 +1,145 @@
 /**
- * Myo Labs — Interactive Scripts
- * Gentle, organic interactions
+ * Myo Labs — Neo-Brutalist Interactive Scripts
+ * Raw. Responsive. Alive.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initTextSplit();
+    initGridCanvas();
     initRevealAnimations();
     initSmoothScroll();
     initNavScroll();
-    initFormInteractions();
-    initParallaxOrbs();
-    initEnsōInteraction();
-    initTextReveal();
-    initMagneticButtons();
-    initDryBrushStreaks();
-    initThankYouMessage();
-    initParallaxScroll();
+    initMagneticElements();
+    initGlitchEffects();
+    initScrollVelocity();
+    initWorkCardHovers();
+    initStatsCounter();
+    initHowSteps();
 });
 
 /**
- * Split hero title text into individual characters for animation
+ * Cursor-reactive grid canvas
+ * Creates a grid that distorts around the cursor
  */
-function initTextSplit() {
-    const titleSpans = document.querySelectorAll('.hero-title span');
-
-    titleSpans.forEach((span, spanIndex) => {
-        const text = span.textContent;
-        span.innerHTML = '';
-        span.classList.add('split-text');
-
-        // Split into characters
-        text.split('').forEach((char, charIndex) => {
-            const charSpan = document.createElement('span');
-            charSpan.classList.add('char');
-            charSpan.textContent = char === ' ' ? '\u00A0' : char;
-            // Stagger delay based on character position
-            const delay = 0.1 + (spanIndex * 0.25) + (charIndex * 0.025);
-            charSpan.style.animationDelay = `${delay}s`;
-            span.appendChild(charSpan);
-        });
+function initGridCanvas() {
+    const canvas = document.getElementById('gridCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let mouseX = -1000;
+    let mouseY = -1000;
+    let targetMouseX = -1000;
+    let targetMouseY = -1000;
+    
+    const gridSize = 40;
+    const distortRadius = 150;
+    const distortStrength = 20;
+    
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+    
+    function drawGrid() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.lineWidth = 1;
+        
+        // Smooth mouse follow
+        mouseX += (targetMouseX - mouseX) * 0.1;
+        mouseY += (targetMouseY - mouseY) * 0.1;
+        
+        // Draw vertical lines
+        for (let x = 0; x <= width; x += gridSize) {
+            ctx.beginPath();
+            for (let y = 0; y <= height; y += 5) {
+                const dx = x - mouseX;
+                const dy = y - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                let offsetX = 0;
+                if (distance < distortRadius) {
+                    const force = (1 - distance / distortRadius) * distortStrength;
+                    offsetX = (dx / distance) * force || 0;
+                }
+                
+                if (y === 0) {
+                    ctx.moveTo(x + offsetX, y);
+                } else {
+                    ctx.lineTo(x + offsetX, y);
+                }
+            }
+            ctx.stroke();
+        }
+        
+        // Draw horizontal lines
+        for (let y = 0; y <= height; y += gridSize) {
+            ctx.beginPath();
+            for (let x = 0; x <= width; x += 5) {
+                const dx = x - mouseX;
+                const dy = y - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                let offsetY = 0;
+                if (distance < distortRadius) {
+                    const force = (1 - distance / distortRadius) * distortStrength;
+                    offsetY = (dy / distance) * force || 0;
+                }
+                
+                if (x === 0) {
+                    ctx.moveTo(x, y + offsetY);
+                } else {
+                    ctx.lineTo(x, y + offsetY);
+                }
+            }
+            ctx.stroke();
+        }
+        
+        // Draw accent points at intersections near cursor
+        ctx.fillStyle = 'rgba(255, 61, 0, 0.3)';
+        for (let x = 0; x <= width; x += gridSize) {
+            for (let y = 0; y <= height; y += gridSize) {
+                const dx = x - mouseX;
+                const dy = y - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < distortRadius * 0.7) {
+                    const size = (1 - distance / (distortRadius * 0.7)) * 4;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+        
+        requestAnimationFrame(drawGrid);
+    }
+    
+    window.addEventListener('resize', resize);
+    document.addEventListener('mousemove', (e) => {
+        targetMouseX = e.clientX;
+        targetMouseY = e.clientY;
     });
+    
+    document.addEventListener('mouseleave', () => {
+        targetMouseX = -1000;
+        targetMouseY = -1000;
+    });
+    
+    resize();
+    drawGrid();
 }
 
 /**
  * Reveal animations on scroll
- * Elements with .reveal class fade in when entering viewport
  */
 function initRevealAnimations() {
-    const revealElements = document.querySelectorAll('.reveal');
-
     const observerOptions = {
         root: null,
-        rootMargin: '0px 0px -80px 0px',
+        rootMargin: '0px 0px -100px 0px',
         threshold: 0.1
     };
-
+    
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -63,8 +148,15 @@ function initRevealAnimations() {
             }
         });
     }, observerOptions);
-
-    revealElements.forEach(el => {
+    
+    // Add reveal class to elements
+    const elementsToReveal = document.querySelectorAll(
+        '.work-card, .how-step, .why-item, .why-statement, .ownership-text, .ownership-visual, .contact-content > *'
+    );
+    
+    elementsToReveal.forEach((el, index) => {
+        el.classList.add('reveal');
+        el.style.transitionDelay = `${(index % 4) * 0.1}s`;
         revealObserver.observe(el);
     });
 }
@@ -74,14 +166,14 @@ function initRevealAnimations() {
  */
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+        anchor.addEventListener('click', function(e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
-
+            
             if (target) {
                 const navHeight = document.querySelector('.nav').offsetHeight;
                 const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 20;
-
+                
                 window.scrollTo({
                     top: targetPosition,
                     behavior: 'smooth'
@@ -92,25 +184,22 @@ function initSmoothScroll() {
 }
 
 /**
- * Navigation scroll effects
- * Subtle background change on scroll
+ * Navigation effects on scroll
  */
 function initNavScroll() {
     const nav = document.querySelector('.nav');
     let lastScroll = 0;
     let ticking = false;
-
+    
     window.addEventListener('scroll', () => {
         lastScroll = window.pageYOffset;
-
+        
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 if (lastScroll > 100) {
-              //      nav.style.background = 'rgba(250, 248, 245, 0.95)';
-                    nav.style.boxShadow = '0 1px 20px rgba(0, 0, 0, 0.05)';
+                    nav.style.background = 'rgba(10, 10, 10, 0.95)';
                 } else {
-                  //  nav.style.background = 'rgba(250, 248, 245, 0.8)';
-                    nav.style.boxShadow = 'none';
+                    nav.style.background = 'rgba(10, 10, 10, 0.8)';
                 }
                 ticking = false;
             });
@@ -120,225 +209,199 @@ function initNavScroll() {
 }
 
 /**
- * Form interactions
- * Gentle feedback and focus animations
+ * Magnetic effect for buttons and interactive elements
  */
-function initFormInteractions() {
-    const form = document.getElementById('contactForm');
-    if (!form) return;
-
-    const inputs = form.querySelectorAll('input:not([type="hidden"]), textarea');
-
-    // Add focus/blur animations
-    inputs.forEach(input => {
-        const formGroup = input.closest('.form-group');
-        if (!formGroup) return;
-
-        input.addEventListener('focus', () => {
-            formGroup.style.transform = 'translateX(4px)';
+function initMagneticElements() {
+    const magneticElements = document.querySelectorAll('.btn, .nav-cta, .contact-email');
+    
+    magneticElements.forEach(el => {
+        el.addEventListener('mousemove', (e) => {
+            const rect = el.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            el.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
         });
-
-        input.addEventListener('blur', () => {
-            formGroup.style.transform = 'translateX(0)';
+        
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = '';
         });
     });
+    
+    // Logo magnetic effect
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.addEventListener('mousemove', (e) => {
+            const rect = logo.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            logo.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+        });
+        
+        logo.addEventListener('mouseleave', () => {
+            logo.style.transform = '';
+        });
+    }
 }
 
 /**
- * Parallax effect for ambient orbs
- * Subtle movement on mouse move
+ * Glitch effects on scroll and interaction
  */
-function initParallaxOrbs() {
-    const orbs = document.querySelectorAll('.orb');
-    let mouseX = 0;
-    let mouseY = 0;
-    let currentX = 0;
-    let currentY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-    });
-
-    function animateOrbs() {
-        // Smooth interpolation
-        currentX += (mouseX - currentX) * 0.02;
-        currentY += (mouseY - currentY) * 0.02;
-
-        orbs.forEach((orb, index) => {
-            const speed = (index + 1) * 15;
-            const x = currentX * speed;
-            const y = currentY * speed;
-
-            orb.style.transform = `translate(${x}px, ${y}px)`;
-        });
-
-        requestAnimationFrame(animateOrbs);
-    }
-
-    animateOrbs();
-}
-
-/**
- * Add spinning animation for loading state
- */
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    .spin {
-        animation: spin 1s linear infinite;
-    }
-`;
-document.head.appendChild(style);
-
-/**
- * Ensō interaction
- * Responds to mouse proximity with subtle scaling
- * Redraws when scrolling back to hero
- */
-function initEnsōInteraction() {
-    const zenCircle = document.querySelector('.hero-visual .zen-circle');
-    const heroSection = document.querySelector('.hero');
-    if (!zenCircle || !heroSection) return;
-
-    let isHovering = false;
-    let hasLeftHero = false;
-
-    // Mouse interaction
-    zenCircle.addEventListener('mouseenter', () => {
-        isHovering = true;
-        zenCircle.style.animationPlayState = 'paused';
-    });
-
-    zenCircle.addEventListener('mouseleave', () => {
-        isHovering = false;
-        zenCircle.style.animationPlayState = 'running';
-    });
-
-    zenCircle.addEventListener('mousemove', (e) => {
-        if (!isHovering) return;
-
-        const rect = zenCircle.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        const deltaX = (e.clientX - centerX) / rect.width;
-        const deltaY = (e.clientY - centerY) / rect.height;
-
-        const rotateX = deltaY * 15;
-        const rotateY = deltaX * -15;
-
-        zenCircle.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-    });
-
-    zenCircle.addEventListener('mouseleave', () => {
-        zenCircle.style.transform = '';
-    });
-
-    // Scroll-triggered redraw
-    const observer = new IntersectionObserver((entries) => {
+function initGlitchEffects() {
+    const sections = document.querySelectorAll('section');
+    let lastSection = null;
+    
+    const sectionObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-                hasLeftHero = true;
-            } else if (hasLeftHero && entry.isIntersecting) {
-                // User scrolled back to hero - redraw the ensō
-                redrawEnsō();
-                hasLeftHero = false;
+            if (entry.isIntersecting && entry.target !== lastSection) {
+                // Trigger glitch on section change
+                triggerGlitch();
+                lastSection = entry.target;
             }
         });
     }, { threshold: 0.3 });
-
-    observer.observe(heroSection);
+    
+    sections.forEach(section => {
+        sectionObserver.observe(section);
+    });
+    
+    // Glitch on click for certain elements
+    document.querySelectorAll('.section-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            tag.classList.add('glitch');
+            setTimeout(() => tag.classList.remove('glitch'), 300);
+        });
+    });
 }
 
 /**
- * Redraw the ensō animation
+ * Trigger a brief glitch effect on the page
  */
-function redrawEnsō() {
-    const strokes = document.querySelectorAll('.ensō-s');
-    const inkPool = document.querySelectorAll('.ensō-ink-pool ellipse');
-    const splatter = document.querySelectorAll('.ensō-splatter circle');
-    const dryStreaks = document.querySelectorAll('.dry-streak');
-
-    // Reset all stroke animations
-    strokes.forEach(stroke => {
-        stroke.style.animation = 'none';
-        stroke.offsetHeight; // Trigger reflow
-        stroke.style.animation = '';
-    });
-
-    // Reset ink pool
-    inkPool.forEach(el => {
-        el.style.animation = 'none';
-        el.offsetHeight;
-        el.style.animation = '';
-    });
-
-    // Reset splatter
-    splatter.forEach(el => {
-        el.style.animation = 'none';
-        el.offsetHeight;
-        el.style.animation = '';
-    });
-
-    // Regenerate dry streaks
-    const container = document.querySelector('.ensō-dry-streaks');
-    if (container) {
-        container.innerHTML = '';
-        // Re-run the dry brush generation
-        if (typeof initDryBrushStreaks === 'function') {
-            initDryBrushStreaks();
-        }
-    }
-}
-
-/**
- * Text reveal animation for section headers
- */
-function initTextReveal() {
-    const sectionHeaders = document.querySelectorAll('.section-header h2');
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('text-revealed');
-                observer.unobserve(entry.target);
+function triggerGlitch() {
+    const body = document.body;
+    body.style.animation = 'none';
+    body.offsetHeight; // Trigger reflow
+    
+    // Brief RGB split effect
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        mix-blend-mode: screen;
+        animation: glitchOverlay 0.15s ease-out forwards;
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Add keyframes if not already present
+    if (!document.getElementById('glitchStyles')) {
+        const style = document.createElement('style');
+        style.id = 'glitchStyles';
+        style.textContent = `
+            @keyframes glitchOverlay {
+                0% {
+                    background: linear-gradient(90deg, 
+                        rgba(255, 0, 0, 0.1) 0%, 
+                        transparent 50%, 
+                        rgba(0, 255, 255, 0.1) 100%
+                    );
+                    transform: translateX(-5px);
+                }
+                50% {
+                    background: linear-gradient(90deg, 
+                        rgba(0, 255, 255, 0.1) 0%, 
+                        transparent 50%, 
+                        rgba(255, 0, 0, 0.1) 100%
+                    );
+                    transform: translateX(5px);
+                }
+                100% {
+                    background: transparent;
+                    transform: translateX(0);
+                }
             }
-        });
-    }, { threshold: 0.5 });
+        `;
+        document.head.appendChild(style);
+    }
+    
+    setTimeout(() => overlay.remove(), 150);
+}
 
-    sectionHeaders.forEach(header => {
-        observer.observe(header);
+/**
+ * Scroll velocity effects
+ * Elements respond to how fast the user is scrolling
+ */
+function initScrollVelocity() {
+    let lastScrollY = window.pageYOffset;
+    let lastTime = performance.now();
+    let velocity = 0;
+    let ticking = false;
+    
+    const workCards = document.querySelectorAll('.work-card');
+    const heroLines = document.querySelectorAll('.hero-line');
+    
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const currentScrollY = window.pageYOffset;
+                const currentTime = performance.now();
+                const deltaY = currentScrollY - lastScrollY;
+                const deltaTime = currentTime - lastTime;
+                
+                // Calculate velocity (pixels per millisecond)
+                velocity = deltaY / deltaTime;
+                
+                // Apply effects based on velocity
+                const skewAmount = Math.min(Math.max(velocity * 20, -5), 5);
+                const scaleAmount = 1 - Math.abs(velocity) * 0.1;
+                
+                // Apply to work cards
+                workCards.forEach(card => {
+                    card.style.transform = `skewY(${skewAmount}deg)`;
+                });
+                
+                // Apply subtle effect to hero if visible
+                if (currentScrollY < window.innerHeight) {
+                    heroLines.forEach(line => {
+                        line.style.transform = `translateX(${velocity * 10}px)`;
+                    });
+                }
+                
+                lastScrollY = currentScrollY;
+                lastTime = currentTime;
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+    
+    // Reset transforms when scroll stops
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            workCards.forEach(card => {
+                card.style.transform = '';
+            });
+            heroLines.forEach(line => {
+                line.style.transform = '';
+            });
+        }, 150);
     });
 }
 
 /**
- * Magnetic button effect
- * Buttons subtly follow cursor when hovering
+ * Work card hover effects
  */
-function initMagneticButtons() {
-    const buttons = document.querySelectorAll('.btn-primary, .nav-cta');
-
-    buttons.forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-
-            btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
-        });
-
-        btn.addEventListener('mouseleave', () => {
-            btn.style.transform = '';
-        });
-    });
-
-    // Magnetic service cards
-    const cards = document.querySelectorAll('.service-card');
-
+function initWorkCardHovers() {
+    const cards = document.querySelectorAll('.work-card, .why-item, .server');
+    
     cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
@@ -346,13 +409,13 @@ function initMagneticButtons() {
             const y = e.clientY - rect.top;
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-
-            const rotateX = (y - centerY) / 10;
-            const rotateY = (centerX - x) / 10;
-
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+            
+            const rotateX = (y - centerY) / 25;
+            const rotateY = (centerX - x) / 25;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
         });
-
+        
         card.addEventListener('mouseleave', () => {
             card.style.transform = '';
         });
@@ -360,21 +423,184 @@ function initMagneticButtons() {
 }
 
 /**
- * Scroll progress indicator
+ * Cursor trail effect (optional - uncomment to enable)
+ */
+/*
+function initCursorTrail() {
+    const trailLength = 20;
+    const trails = [];
+    
+    for (let i = 0; i < trailLength; i++) {
+        const trail = document.createElement('div');
+        trail.style.cssText = `
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 61, 0, ${1 - i / trailLength});
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-out;
+        `;
+        document.body.appendChild(trail);
+        trails.push({ el: trail, x: 0, y: 0 });
+    }
+    
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+    
+    function animateTrails() {
+        let x = mouseX;
+        let y = mouseY;
+        
+        trails.forEach((trail, index) => {
+            const nextX = x;
+            const nextY = y;
+            
+            trail.x += (nextX - trail.x) * 0.3;
+            trail.y += (nextY - trail.y) * 0.3;
+            
+            trail.el.style.left = trail.x + 'px';
+            trail.el.style.top = trail.y + 'px';
+            
+            x = trail.x;
+            y = trail.y;
+        });
+        
+        requestAnimationFrame(animateTrails);
+    }
+    
+    animateTrails();
+}
+*/
+
+/**
+ * Typing effect for hero subtitle (optional)
+ */
+/*
+function initTypingEffect() {
+    const heroSub = document.querySelector('.hero-sub');
+    if (!heroSub) return;
+    
+    const text = heroSub.textContent;
+    heroSub.textContent = '';
+    heroSub.style.opacity = '1';
+    
+    let i = 0;
+    const typeSpeed = 30;
+    
+    function type() {
+        if (i < text.length) {
+            heroSub.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, typeSpeed);
+        }
+    }
+    
+    // Start after hero animation
+    setTimeout(type, 1500);
+}
+*/
+
+/**
+ * Animated stats counter
+ */
+function initStatsCounter() {
+    const stats = document.querySelectorAll('.stat-number[data-target]');
+    if (!stats.length) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const target = parseInt(el.getAttribute('data-target'));
+                animateCounter(el, target);
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    stats.forEach(stat => observer.observe(stat));
+}
+
+function animateCounter(el, target) {
+    const duration = 2000;
+    const start = 0;
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const current = Math.floor(start + (target - start) * easeOutQuart);
+        
+        el.textContent = current;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            el.textContent = target;
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+/**
+ * How section step animations
+ */
+function initHowSteps() {
+    const steps = document.querySelectorAll('.how-step');
+    if (!steps.length) return;
+    
+    steps.forEach((step, index) => {
+        step.addEventListener('mouseenter', () => {
+            // Pulse the step number
+            const number = step.querySelector('.how-step-number');
+            if (number) {
+                number.style.transform = 'scale(1.1)';
+                number.style.background = 'var(--color-accent)';
+                number.style.color = 'var(--color-bg)';
+                number.style.borderColor = 'var(--color-accent)';
+            }
+        });
+        
+        step.addEventListener('mouseleave', () => {
+            const number = step.querySelector('.how-step-number');
+            if (number) {
+                number.style.transform = '';
+                number.style.background = '';
+                number.style.color = '';
+                number.style.borderColor = '';
+            }
+        });
+    });
+}
+
+/**
+ * Initialize scroll progress indicator
  */
 function initScrollProgress() {
     const indicator = document.createElement('div');
     indicator.className = 'scroll-progress';
     indicator.innerHTML = '<div class="scroll-progress-bar"></div>';
     document.body.appendChild(indicator);
-
+    
     const bar = indicator.querySelector('.scroll-progress-bar');
-
+    
     window.addEventListener('scroll', () => {
         const scrollTop = window.pageYOffset;
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
         const scrollPercent = (scrollTop / docHeight) * 100;
-
+        
         bar.style.width = `${scrollPercent}%`;
     });
 }
@@ -394,7 +620,7 @@ progressStyle.textContent = `
     .scroll-progress-bar {
         height: 100%;
         width: 0;
-        background: linear-gradient(90deg, var(--color-sage) 0%, var(--color-terracotta) 100%);
+        background: var(--color-accent, #FF3D00);
         transition: width 0.1s ease-out;
     }
 `;
@@ -404,150 +630,27 @@ document.head.appendChild(progressStyle);
 initScrollProgress();
 
 /**
- * Parallax scroll effect
- * Different elements move at different speeds for depth
+ * Easter egg: Konami code triggers intense glitch
  */
-function initParallaxScroll() {
-    const heroContent = document.querySelector('.hero-content');
-    const heroVisual = document.querySelector('.hero-visual');
-    const zenCircle = document.querySelector('.zen-circle');
-    const orbs = document.querySelectorAll('.orb');
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
 
-    let ticking = false;
-
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const scrollY = window.pageYOffset;
-                const windowHeight = window.innerHeight;
-
-                // Only apply parallax when in or near the hero section
-                if (scrollY < windowHeight * 1.5) {
-                    // Hero content moves up slower (sticky feel)
-                    if (heroContent) {
-                        heroContent.style.transform = `translateY(${scrollY * 0.15}px)`;
-                        heroContent.style.opacity = 1 - (scrollY / windowHeight) * 0.8;
-                    }
-
-                    // Ensō moves up faster (foreground feel)
-                    if (zenCircle) {
-                        zenCircle.style.transform = `translateY(${scrollY * -0.1}px)`;
-                    }
-
-                    // Orbs move at different rates for depth
-                    orbs.forEach((orb, index) => {
-                        const speed = 0.05 + (index * 0.03);
-                        orb.style.transform = `translateY(${scrollY * speed}px)`;
-                    });
+document.addEventListener('keydown', (e) => {
+    if (e.key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+            // Intense glitch sequence
+            let glitchCount = 0;
+            const glitchInterval = setInterval(() => {
+                triggerGlitch();
+                glitchCount++;
+                if (glitchCount >= 10) {
+                    clearInterval(glitchInterval);
                 }
-
-                ticking = false;
-            });
-            ticking = true;
+            }, 100);
+            konamiIndex = 0;
         }
-    });
-}
-
-/**
- * Show thank you message after form submission
- * Detects ?thankyou=true query parameter
- */
-function initThankYouMessage() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('thankyou') !== 'true') return;
-
-    // Scroll to contact section
-    setTimeout(() => {
-        const contactSection = document.getElementById('contact');
-        if (contactSection) {
-            contactSection.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, 300);
-
-    // Replace form with thank you message
-    const form = document.getElementById('contactForm');
-    if (!form) return;
-
-    form.innerHTML = `
-        <div class="thank-you-message">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="thank-you-icon">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="8 12 11 15 16 9" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <h3>Thank you!</h3>
-            <p>Your message has been sent. We'll be in touch soon.</p>
-        </div>
-    `;
-
-    // Clean up the URL (remove query param)
-    const cleanUrl = window.location.origin + window.location.pathname;
-    window.history.replaceState({}, document.title, cleanUrl);
-}
-
-/**
- * Generate randomized dry brush streaks for the ensō
- * Creates organic white gaps through the brush stroke
- */
-function initDryBrushStreaks() {
-    const container = document.querySelector('.ensō-dry-streaks');
-    if (!container) return;
-
-    const cx = 100, cy = 100, r = 70;
-    const streakCount = 18 + Math.floor(Math.random() * 8); // 18-25 streaks
-
-    for (let i = 0; i < streakCount; i++) {
-        // Distribute around the circle, but more density on right side (end of stroke)
-        // Angle 0 = right, PI/2 = bottom, PI = left, 3PI/2 = top
-        let angle;
-        const rand = Math.random();
-        if (rand < 0.6) {
-            // 60% on right side and bottom-right (where brush dries out)
-            angle = -Math.PI/3 + Math.random() * Math.PI * 0.8;
-        } else if (rand < 0.85) {
-            // 25% on top arc
-            angle = -Math.PI/2 + Math.random() * Math.PI * 0.4 - Math.PI * 0.2;
-        } else {
-            // 15% scattered elsewhere (but not on left side where ink is fresh)
-            angle = Math.random() * Math.PI * 2;
-            // Skip left side (fresh ink)
-            if (angle > Math.PI * 0.6 && angle < Math.PI * 1.4) continue;
-        }
-
-        // Calculate start point on the circle
-        const x1 = cx + Math.cos(angle) * r;
-        const y1 = cy + Math.sin(angle) * r;
-
-        // Streak follows the tangent with slight curve
-        const tangentAngle = angle + Math.PI/2;
-        const streakLength = 8 + Math.random() * 20;
-        const curve = (Math.random() - 0.5) * 10;
-
-        const midX = x1 + Math.cos(tangentAngle) * streakLength * 0.5 + curve;
-        const midY = y1 + Math.sin(tangentAngle) * streakLength * 0.5 + curve;
-        const x2 = x1 + Math.cos(tangentAngle) * streakLength;
-        const y2 = y1 + Math.sin(tangentAngle) * streakLength;
-
-        // Create the streak path
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${midX.toFixed(1)} ${midY.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`);
-        path.classList.add('dry-streak');
-
-        // Randomize width - thinner at start of stroke, thicker at end
-        const isEndSection = angle > -Math.PI/4 && angle < Math.PI/2;
-        const baseWidth = isEndSection ? 1.5 + Math.random() * 2.5 : 0.8 + Math.random() * 1.5;
-        path.style.strokeWidth = `${baseWidth}px`;
-
-        // Randomize timing - appears as brush passes that section
-        // Map angle to delay (0.1s to 0.4s range)
-        const normalizedAngle = (angle + Math.PI) / (Math.PI * 2);
-        const baseDelay = 0.08 + normalizedAngle * 0.35;
-        const delay = baseDelay + (Math.random() - 0.5) * 0.05;
-        path.style.animationDelay = `${delay.toFixed(3)}s`;
-
-        // Randomize opacity slightly
-        const opacity = 0.6 + Math.random() * 0.35;
-        path.style.setProperty('--streak-opacity', opacity);
-
-        container.appendChild(path);
+    } else {
+        konamiIndex = 0;
     }
-}
+});
