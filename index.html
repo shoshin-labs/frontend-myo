@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>myolabs | we build, you own</title>
+    <title>myolabs | We Build</title>
     <meta name="description" content="Less theater. More delivery. Myo Labs builds hard engineering for people who value craft over ceremony.">
 
     <!-- Favicon -->
@@ -25,9 +25,10 @@
 
     <!-- Navigation -->
     <nav class="nav">
-        <a href="#" class="logo">
-            <span class="logo-text">myo<span class="logo-labs">labs</span></span>
+        <a href="#" class="logo" id="logo-easter-egg">
+            <span class="logo-text"><span class="logo-letter">m</span><span class="logo-letter">y</span><span class="logo-letter">o</span><span class="logo-labs"><span class="logo-letter">l</span><span class="logo-letter">a</span><span class="logo-letter">b</span><span class="logo-letter">s</span></span></span>
             <span class="logo-dot"></span>
+            <span class="logo-secret">no drama</span>
         </a>
         <div class="nav-links">
             <a href="#work">Work</a>
@@ -39,21 +40,25 @@
 
     <!-- Hero Section -->
     <header class="hero">
+        <!-- Decorative network -->
+        <div class="hero-network">
+            <!-- Network canvas for nodes and connections -->
+            <canvas id="heroNetworkCanvas"></canvas>
+        </div>
         <div class="hero-content">
             <div class="hero-lines">
                 <div class="hero-line" data-delay="0">
-                    <span class="strike">Less theatre.</span>
+                    <span class="strike">No drama.</span>
                 </div>
                 <div class="hero-line" data-delay="1">
-                    <span class="highlight">More delivery.</span>
+                    <span class="highlight">Pure delivery.</span>
                 </div>
             </div>
             <p class="hero-sub">
-                We don't do pitch decks or account managers. We do hard engineering and painless deployments. We trade the status meeting for the deployment notification. We validate the brief with code, not speculation. We aren't your agency, we're the engine room. We don't sell you a dependency, we ship tailored systems, to you, which you own.
-            </p>
+                We don't do pitch decks or account managers. We do hard engineering and painless deployments. We trade the status meeting for the deployment notification. We validate the brief with code, not speculation. We aren't your agency, we're the engine room. We don't sell you a dependency, we ship tailored systems, to you, which you own.      </p>
             <div class="hero-cta">
                 <a href="#contact" class="btn btn-primary">
-                    <span>Start a project</span>
+                    <span>Make it happen</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -136,7 +141,7 @@
                         <div class="how-step-line"></div>
                     </div>
                     <h3>Scope it tight</h3>
-                    <p>We start with a conversation. What's the problem? What does success look like? No 40-page requirements docs—just clarity.</p>
+                    <p>Creep breaks most budgets. We start with a chat. What's the problem? What does success look like? We take it from there, building the foundational understanding and crucially, documentation, whilst we work out exactly WTF it is you really need us to build.</p>
                 </div>
                 <div class="how-step" data-step="02">
                     <div class="how-step-header">
@@ -144,7 +149,7 @@
                         <div class="how-step-line"></div>
                     </div>
                     <h3>Build in the open</h3>
-                    <p>You see the work as it happens. Daily updates, shared repos, no black boxes. You're never wondering what we're doing.</p>
+                    <p>You see the work as it happens. Updates as often as you need them, shared repos where you can see the code commits and pull requests, absolutely no black boxes. We can even provide automated progress reports if you want them.</p>
                 </div>
                 <div class="how-step" data-step="03">
                     <div class="how-step-header">
@@ -152,15 +157,15 @@
                         <div class="how-step-line"></div>
                     </div>
                     <h3>Ship fast, iterate faster</h3>
-                    <p>We get something real in your hands quickly. Then we refine. Working software beats perfect plans every time.</p>
+                    <p>We get something real in your hands quickly, but not too quick – it has to work. Then we refine. With you and your team, real time feedback integrates into our workstream. And we always test before we ship – or at least, our eager team of agents can't wait to.</p>
                 </div>
                 <div class="how-step" data-step="04">
                     <div class="how-step-header">
                         <span class="how-step-number">04</span>
                         <div class="how-step-line-end"></div>
                     </div>
-                    <h3>Make ourselves redundant</h3>
-                    <p>We document everything. We train your team. Our goal is for you to never need us again. That's not how most shops operate.</p>
+                    <h3>Make ourselves redundant. Well, &apos;til next time</h3>
+                    <p>We document everything. We work in infrastructure you own, in code repos you own. We can train your team in the rare case where the software doesn't explain itself. Our goal is for you to never need us again, until the next time you do. When you see the ROI, come back for more.</p>
                 </div>
             </div>
             <div class="how-visual">
@@ -293,7 +298,13 @@
             <p class="statement-contrast">
                 <span class="statement-strike">They sell you a dependency.</span>
             </p>
-            <p class="statement-main">We sell you freedom.</p>
+            <div class="statement-main">
+                <span class="statement-word">We</span>
+                <span class="statement-word">sell</span>
+                <span class="statement-word">you</span>
+                <span class="statement-word statement-freedom">freedom<span class="freedom-underline"></span></span>
+            </div>
+            <p class="statement-aside">(and really well engineered software)</p>
         </div>
     </section>
 
