@@ -235,6 +235,11 @@ body.loaded .scroll-indicator {
     font-weight: 500;
 }
 
+.logo-letter {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
 .logo-dot {
     width: 8px;
     height: 8px;
@@ -242,6 +247,46 @@ body.loaded .scroll-indicator {
     border-radius: 50%;
     margin-left: 2px;
     animation: pulse 2s ease-in-out infinite;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-secret {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--color-accent);
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Easter egg hover state */
+.logo.easter-egg-active .logo-letter:nth-child(1) { transform: translateY(-4px) rotate(-5deg); transition-delay: 0ms; }
+.logo.easter-egg-active .logo-letter:nth-child(2) { transform: translateY(-6px) rotate(3deg); transition-delay: 30ms; }
+.logo.easter-egg-active .logo-letter:nth-child(3) { transform: translateY(-5px) rotate(-2deg); transition-delay: 60ms; }
+.logo.easter-egg-active .logo-labs .logo-letter:nth-child(1) { transform: translateY(-4px) rotate(4deg); transition-delay: 90ms; }
+.logo.easter-egg-active .logo-labs .logo-letter:nth-child(2) { transform: translateY(-6px) rotate(-3deg); transition-delay: 120ms; }
+.logo.easter-egg-active .logo-labs .logo-letter:nth-child(3) { transform: translateY(-5px) rotate(2deg); transition-delay: 150ms; }
+.logo.easter-egg-active .logo-labs .logo-letter:nth-child(4) { transform: translateY(-4px) rotate(-4deg); transition-delay: 180ms; }
+
+.logo.easter-egg-active .logo-dot {
+    transform: scale(1.5);
+    box-shadow: 
+        0 0 20px rgba(255, 61, 0, 0.8),
+        0 0 40px rgba(255, 61, 0, 0.4);
+    animation: none;
+}
+
+.logo.easter-egg-active .logo-secret {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 200ms;
 }
 
 @keyframes pulse {

@@ -1648,3 +1648,102 @@ document.addEventListener('keydown', (e) => {
         konamiIndex = 0;
     }
 });
+
+/**
+ * Logo Easter Egg
+ */
+function initLogoEasterEgg() {
+    const logo = document.getElementById('logo-easter-egg');
+    if (!logo) return;
+    
+    const dot = logo.querySelector('.logo-dot');
+    let particles = [];
+    let isActive = false;
+    
+    function createParticles() {
+        if (!dot) return;
+        
+        const rect = dot.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Create orbiting particles
+        for (let i = 0; i < 6; i++) {
+            const particle = document.createElement('div');
+            const angle = (Math.PI * 2 / 6) * i;
+            const size = 3 + Math.random() * 3;
+            
+            particle.style.cssText = `
+                position: fixed;
+                width: ${size}px;
+                height: ${size}px;
+                background: var(--color-accent);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1000;
+                box-shadow: 0 0 ${size * 2}px rgba(255, 61, 0, 0.6);
+                transition: opacity 0.3s ease;
+            `;
+            
+            document.body.appendChild(particle);
+            particles.push({
+                element: particle,
+                angle: angle,
+                radius: 15 + Math.random() * 10,
+                speed: 0.03 + Math.random() * 0.02,
+                centerX,
+                centerY
+            });
+        }
+    }
+    
+    function animateParticles() {
+        if (!isActive) {
+            // Fade out and remove particles
+            particles.forEach(p => {
+                p.element.style.opacity = '0';
+                setTimeout(() => p.element.remove(), 300);
+            });
+            particles = [];
+            return;
+        }
+        
+        const rect = dot.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        particles.forEach(p => {
+            p.angle += p.speed;
+            p.centerX = centerX;
+            p.centerY = centerY;
+            
+            const x = p.centerX + Math.cos(p.angle) * p.radius;
+            const y = p.centerY + Math.sin(p.angle) * p.radius;
+            
+            p.element.style.left = `${x}px`;
+            p.element.style.top = `${y}px`;
+            p.element.style.transform = 'translate(-50%, -50%)';
+        });
+        
+        requestAnimationFrame(animateParticles);
+    }
+    
+    logo.addEventListener('mouseenter', () => {
+        isActive = true;
+        logo.classList.add('easter-egg-active');
+        createParticles();
+        animateParticles();
+        
+        // Log something fun to console
+        console.log('%c👋 Hey there, curious one!', 'color: #FF3D00; font-size: 16px; font-weight: bold;');
+        console.log('%cWe like people who dig into the code.', 'color: #888; font-size: 12px;');
+    });
+    
+    logo.addEventListener('mouseleave', () => {
+        isActive = false;
+        logo.classList.remove('easter-egg-active');
+    });
+}
+
+// Initialize logo easter egg
+document.addEventListener('DOMContentLoaded', initLogoEasterEgg);
