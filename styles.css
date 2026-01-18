@@ -457,6 +457,10 @@ body.loaded #heroNetworkCanvas {
     position: relative;
 }
 
+.hero-line .highlight-orange {
+    color: var(--color-accent);
+}
+
 .hero-sub .highlight {
     color: var(--color-accent);
     font-weight: 500;
