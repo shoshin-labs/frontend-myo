@@ -531,125 +531,222 @@ function initGridCanvas() {
     let targetMouseY = -1000;
     let time = 0;
     
-    const gridSize = 40;
-    const distortRadius = 150;
-    const distortStrength = 20;
+    const distortRadius = 120;
+    const distortStrength = 25;
     
-    // Organic wave parameters
-    const waveAmplitude = 6;
-    const waveFrequency = 0.008;
-    const waveSpeed = 0.3;
+    // Mycelium network - branching growth
+    let branches = [];
     
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
+        generateMycelium();
     }
     
-    // Simplex-style noise approximation for organic movement
+    // Noise function for organic movement
     function noise(x, y, t) {
-        const n1 = Math.sin(x * 0.01 + t) * Math.cos(y * 0.012 + t * 0.7);
-        const n2 = Math.sin(x * 0.008 - t * 0.5) * Math.sin(y * 0.009 + t * 0.4);
-        const n3 = Math.cos(x * 0.015 + t * 0.3) * Math.sin(y * 0.011 - t * 0.6);
+        const n1 = Math.sin(x * 0.008 + t * 0.2) * Math.cos(y * 0.01 + t * 0.15);
+        const n2 = Math.sin(x * 0.012 - t * 0.18) * Math.sin(y * 0.007 + t * 0.12);
+        const n3 = Math.cos(x * 0.006 + t * 0.1) * Math.sin(y * 0.009 - t * 0.14);
         return (n1 + n2 + n3) / 3;
     }
     
-    function getWaveOffset(x, y, t, isVertical) {
-        // Multiple wave layers for organic feel
-        let offset = 0;
+    function generateMycelium() {
+        branches = [];
         
-        // Primary slow wave
-        offset += Math.sin((isVertical ? y : x) * waveFrequency + t * waveSpeed) * waveAmplitude;
+        // Create growth points (spore origins)
+        const sporeCount = 6 + Math.floor(Math.random() * 4);
         
-        // Secondary faster, smaller wave
-        offset += Math.sin((isVertical ? y : x) * waveFrequency * 2.3 - t * waveSpeed * 1.4) * (waveAmplitude * 0.4);
+        for (let i = 0; i < sporeCount; i++) {
+            const sporeX = Math.random() * width;
+            const sporeY = Math.random() * height;
+            
+            // Each spore sends out multiple initial branches
+            const branchCount = 4 + Math.floor(Math.random() * 4);
+            for (let j = 0; j < branchCount; j++) {
+                const angle = (Math.PI * 2 / branchCount) * j + (Math.random() - 0.5) * 0.5;
+                growBranch(sporeX, sporeY, angle, 1.0, 0);
+            }
+        }
         
-        // Tertiary noise for irregularity
-        offset += noise(x, y, t) * (waveAmplitude * 0.6);
-        
-        return offset;
+        // Add some edge growth points
+        for (let i = 0; i < 8; i++) {
+            let sporeX, sporeY, angle;
+            const edge = Math.floor(Math.random() * 4);
+            
+            switch(edge) {
+                case 0: // top
+                    sporeX = Math.random() * width;
+                    sporeY = 0;
+                    angle = Math.PI / 2 + (Math.random() - 0.5) * 0.8;
+                    break;
+                case 1: // bottom
+                    sporeX = Math.random() * width;
+                    sporeY = height;
+                    angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.8;
+                    break;
+                case 2: // left
+                    sporeX = 0;
+                    sporeY = Math.random() * height;
+                    angle = (Math.random() - 0.5) * 0.8;
+                    break;
+                case 3: // right
+                    sporeX = width;
+                    sporeY = Math.random() * height;
+                    angle = Math.PI + (Math.random() - 0.5) * 0.8;
+                    break;
+            }
+            
+            growBranch(sporeX, sporeY, angle, 0.8, 0);
+        }
     }
     
-    function drawGrid() {
+    function growBranch(startX, startY, angle, thickness, depth) {
+        if (depth > 5 || thickness < 0.1) return;
+        if (startX < -50 || startX > width + 50 || startY < -50 || startY > height + 50) return;
+        
+        const points = [];
+        let x = startX;
+        let y = startY;
+        let currentAngle = angle;
+        
+        // Branch length decreases with depth
+        const maxLength = (80 + Math.random() * 60) * (1 - depth * 0.12);
+        const segmentLength = 8 + Math.random() * 6;
+        const segments = Math.floor(maxLength / segmentLength);
+        
+        for (let i = 0; i < segments; i++) {
+            points.push({ x, y, phase: Math.random() * Math.PI * 2 });
+            
+            // Organic wandering
+            currentAngle += (Math.random() - 0.5) * 0.4;
+            
+            // Slight tendency to grow away from edges
+            if (x < 100) currentAngle += 0.05;
+            if (x > width - 100) currentAngle -= 0.05;
+            if (y < 100) currentAngle += (currentAngle > 0 ? 0.05 : -0.05);
+            if (y > height - 100) currentAngle -= (currentAngle > 0 ? 0.05 : -0.05);
+            
+            x += Math.cos(currentAngle) * segmentLength;
+            y += Math.sin(currentAngle) * segmentLength;
+            
+            // Chance to branch
+            const branchChance = 0.08 + depth * 0.02;
+            if (i > 2 && Math.random() < branchChance) {
+                const branchAngle = currentAngle + (Math.random() > 0.5 ? 1 : -1) * (0.4 + Math.random() * 0.6);
+                growBranch(x, y, branchAngle, thickness * 0.7, depth + 1);
+            }
+        }
+        
+        // Add final point
+        points.push({ x, y, phase: Math.random() * Math.PI * 2 });
+        
+        if (points.length > 1) {
+            branches.push({
+                points,
+                thickness,
+                depth,
+                opacity: (0.025 + Math.random() * 0.02) * thickness,
+                pulseSpeed: 0.2 + Math.random() * 0.3,
+                pulsePhase: Math.random() * Math.PI * 2
+            });
+        }
+        
+        // End branching - thinner offshoots
+        if (depth < 4 && Math.random() > 0.4) {
+            const endBranches = 1 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < endBranches; i++) {
+                const branchAngle = currentAngle + (Math.random() - 0.5) * 1.2;
+                growBranch(x, y, branchAngle, thickness * 0.5, depth + 1);
+            }
+        }
+    }
+    
+    function drawMycelium() {
         ctx.clearRect(0, 0, width, height);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-        ctx.lineWidth = 1;
         
         time += 0.016;
         
         // Smooth mouse follow
-        mouseX += (targetMouseX - mouseX) * 0.1;
-        mouseY += (targetMouseY - mouseY) * 0.1;
+        mouseX += (targetMouseX - mouseX) * 0.08;
+        mouseY += (targetMouseY - mouseY) * 0.08;
         
-        // Draw vertical lines
-        for (let x = 0; x <= width; x += gridSize) {
+        // Sort branches by depth (draw thicker/main branches last)
+        const sortedBranches = [...branches].sort((a, b) => b.depth - a.depth);
+        
+        // Draw all branches
+        sortedBranches.forEach(branch => {
+            if (branch.points.length < 2) return;
+            
+            // Subtle pulse animation
+            const pulse = (Math.sin(time * branch.pulseSpeed + branch.pulsePhase) + 1) / 2;
+            const opacity = branch.opacity * (0.6 + pulse * 0.4);
+            
             ctx.beginPath();
-            for (let y = 0; y <= height; y += 8) {
-                const dx = x - mouseX;
-                const dy = y - mouseY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+            ctx.lineWidth = Math.max(0.5, branch.thickness * 1.5);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            for (let i = 0; i < branch.points.length; i++) {
+                const p = branch.points[i];
                 
-                // Organic wave offset
-                let offsetX = getWaveOffset(x, y, time, true);
+                // Organic movement - subtler for thinner branches
+                const movementScale = 2 + branch.thickness * 2;
+                const noiseOffset = noise(p.x, p.y, time) * movementScale;
+                const breathe = Math.sin(time * 0.4 + p.phase) * movementScale * 0.5;
                 
-                // Add cursor distortion on top
-                if (distance < distortRadius) {
-                    const force = (1 - distance / distortRadius) * distortStrength;
-                    offsetX += (dx / distance) * force || 0;
+                let drawX = p.x + noiseOffset + breathe;
+                let drawY = p.y + noise(p.y, p.x, time * 0.7) * movementScale;
+                
+                // Cursor interaction
+                const dx = drawX - mouseX;
+                const dy = drawY - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < distortRadius && dist > 0) {
+                    const force = (1 - dist / distortRadius) * distortStrength * branch.thickness;
+                    drawX += (dx / dist) * force;
+                    drawY += (dy / dist) * force;
                 }
                 
-                if (y === 0) {
-                    ctx.moveTo(x + offsetX, y);
+                if (i === 0) {
+                    ctx.moveTo(drawX, drawY);
                 } else {
-                    ctx.lineTo(x + offsetX, y);
+                    // Smooth curves
+                    const prev = branch.points[i - 1];
+                    const prevNoiseOffset = noise(prev.x, prev.y, time) * movementScale;
+                    const prevBreathe = Math.sin(time * 0.4 + prev.phase) * movementScale * 0.5;
+                    let prevX = prev.x + prevNoiseOffset + prevBreathe;
+                    let prevY = prev.y + noise(prev.y, prev.x, time * 0.7) * movementScale;
+                    
+                    const prevDx = prevX - mouseX;
+                    const prevDy = prevY - mouseY;
+                    const prevDist = Math.sqrt(prevDx * prevDx + prevDy * prevDy);
+                    if (prevDist < distortRadius && prevDist > 0) {
+                        const force = (1 - prevDist / distortRadius) * distortStrength * branch.thickness;
+                        prevX += (prevDx / prevDist) * force;
+                        prevY += (prevDy / prevDist) * force;
+                    }
+                    
+                    const midX = (prevX + drawX) / 2;
+                    const midY = (prevY + drawY) / 2;
+                    ctx.quadraticCurveTo(prevX, prevY, midX, midY);
                 }
             }
             ctx.stroke();
+        });
+        
+        // Subtle glow near cursor
+        if (mouseX > 0 && mouseY > 0) {
+            const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, distortRadius * 0.8);
+            gradient.addColorStop(0, 'rgba(255, 61, 0, 0.02)');
+            gradient.addColorStop(1, 'rgba(255, 61, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(mouseX - distortRadius, mouseY - distortRadius, distortRadius * 2, distortRadius * 2);
         }
         
-        // Draw horizontal lines
-        for (let y = 0; y <= height; y += gridSize) {
-            ctx.beginPath();
-            for (let x = 0; x <= width; x += 8) {
-                const dx = x - mouseX;
-                const dy = y - mouseY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                // Organic wave offset
-                let offsetY = getWaveOffset(x, y, time, false);
-                
-                // Add cursor distortion on top
-                if (distance < distortRadius) {
-                    const force = (1 - distance / distortRadius) * distortStrength;
-                    offsetY += (dy / distance) * force || 0;
-                }
-                
-                if (x === 0) {
-                    ctx.moveTo(x, y + offsetY);
-                } else {
-                    ctx.lineTo(x, y + offsetY);
-                }
-            }
-            ctx.stroke();
-        }
-        
-        // Draw accent points at intersections near cursor
-        ctx.fillStyle = 'rgba(255, 61, 0, 0.3)';
-        for (let x = 0; x <= width; x += gridSize) {
-            for (let y = 0; y <= height; y += gridSize) {
-                const dx = x - mouseX;
-                const dy = y - mouseY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < distortRadius * 0.7) {
-                    const size = (1 - distance / (distortRadius * 0.7)) * 4;
-                    ctx.beginPath();
-                    ctx.arc(x, y, size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-        
-        requestAnimationFrame(drawGrid);
+        requestAnimationFrame(drawMycelium);
     }
     
     window.addEventListener('resize', resize);
@@ -664,8 +761,9 @@ function initGridCanvas() {
     });
     
     resize();
-    drawGrid();
+    drawMycelium();
 }
+
 
 /**
  * Reveal animations on scroll
