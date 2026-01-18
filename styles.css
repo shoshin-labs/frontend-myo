@@ -819,6 +819,7 @@ section {
 .code-number { color: #bd93f9; }
 .code-boolean { color: #ff79c6; }
 .code-function { color: #8be9fd; }
+.code-comment { color: #6272a4; font-style: italic; }
 
 /* ============================================
    AI Transparency Bar
