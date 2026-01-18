@@ -208,21 +208,26 @@
                         <span class="code-dot"></span>
                         <span class="code-dot"></span>
                         <span class="code-dot"></span>
-                        <span class="code-title">workflow.ts</span>
+                        <span class="code-title">agent.config.ts</span>
                     </div>
-                    <pre class="code-content"><code><span class="code-keyword">const</span> <span class="code-var">project</span> = {
-  <span class="code-function">exploration</span>: Discuss.<span class="code-var">UNTIL_READY</span>,
-  <span class="code-function">scope</span>?: <span class="code-string">"tight"</span>, // remove creep
-  <span class="code-function">communication</span>: [<span class="code-string">"weekly"</span>, <span class="code-string">"daily"</span>, <span class="code-string">"whenever you need"</span>],
+                    <pre class="code-content"><code><span class="code-comment">// WARNING: this agent is not a vibe coder</span>
+<span class="code-keyword">import</span> { <span class="code-var">Engineer</span> } <span class="code-keyword">from</span> <span class="code-string">"@myolabs/10x"</span>;
+
+<span class="code-keyword">export const</span> <span class="code-var">agent</span> = <span class="code-keyword">new</span> <span class="code-var">Engineer</span>({
+  <span class="code-function">vibes</span>: <span class="code-boolean">false</span>,         <span class="code-comment">// we actually test</span>
+  <span class="code-function">hallucinations</span>: <span class="code-number">0</span>,    <span class="code-comment">// or your money back</span>
+  <span class="code-function">meetings</span>: <span class="code-string">"opt-in"</span>,   <span class="code-comment">// radical, we know</span>
+  <span class="code-function">scope</span>: <span class="code-string">"tight"</span>,
   <span class="code-function">blackBoxes</span>: <span class="code-number">0</span>,
   <span class="code-function">vendorLockin</span>: <span class="code-boolean">false</span>,
   
   <span class="code-function">ship</span>: () => <span class="code-string">"fast"</span>,
   <span class="code-function">iterate</span>: () => <span class="code-string">"faster"</span>,
-  
-  <span class="code-function">satisfaction</span>: Guarantee.<span class="code-var">FULL</span>,
-  <span class="code-function">walkAway</span>: <span class="code-keyword">async</span> () => <span class="code-keyword">await</span> fetch(<span class="code-string">"/bye"</span>)
-};</code></pre>
+  <span class="code-function">breakup</span>: <span class="code-keyword">async</span> () => {
+    <span class="code-keyword">await</span> <span class="code-var">handover</span>.<span class="code-function">everything</span>();
+    <span class="code-keyword">return</span> <span class="code-string">"no hard feelings"</span>;
+  }
+});</code></pre>
                 </div>
             </div>
         </div>
