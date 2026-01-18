@@ -1478,10 +1478,10 @@ section {
     width: 400px;
     height: 400px;
     background: 
-        linear-gradient(90deg, var(--color-border) 1px, transparent 1px),
-        linear-gradient(var(--color-border) 1px, transparent 1px);
+        linear-gradient(90deg, var(--color-accent) 1px, transparent 1px),
+        linear-gradient(var(--color-accent) 1px, transparent 1px);
     background-size: 40px 40px;
-    opacity: 0.3;
+    opacity: 0.25;
     mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
     -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
 }

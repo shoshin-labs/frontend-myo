@@ -611,7 +611,7 @@ function initGridCanvas() {
         let currentAngle = angle;
         
         // Branch length decreases with depth
-        const maxLength = (80 + Math.random() * 60) * (1 - depth * 0.12);
+        const maxLength = (150 + Math.random() * 120) * (1 - depth * 0.12);
         const segmentLength = 8 + Math.random() * 6;
         const segments = Math.floor(maxLength / segmentLength);
         
@@ -646,7 +646,7 @@ function initGridCanvas() {
                 points,
                 thickness,
                 depth,
-                opacity: (0.025 + Math.random() * 0.02) * thickness,
+                opacity: (0.06 + Math.random() * 0.04) * thickness,
                 pulseSpeed: 0.2 + Math.random() * 0.3,
                 pulsePhase: Math.random() * Math.PI * 2
             });
@@ -740,7 +740,7 @@ function initGridCanvas() {
         // Subtle glow near cursor
         if (mouseX > 0 && mouseY > 0) {
             const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, distortRadius * 0.8);
-            gradient.addColorStop(0, 'rgba(255, 61, 0, 0.02)');
+            gradient.addColorStop(0, 'rgba(255, 61, 0, 0.06)');
             gradient.addColorStop(1, 'rgba(255, 61, 0, 0)');
             ctx.fillStyle = gradient;
             ctx.fillRect(mouseX - distortRadius, mouseY - distortRadius, distortRadius * 2, distortRadius * 2);
