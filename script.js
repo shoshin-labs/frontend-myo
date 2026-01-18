@@ -529,20 +529,52 @@ function initGridCanvas() {
     let mouseY = -1000;
     let targetMouseX = -1000;
     let targetMouseY = -1000;
+    let time = 0;
     
     const gridSize = 40;
     const distortRadius = 150;
     const distortStrength = 20;
+    
+    // Organic wave parameters
+    const waveAmplitude = 6;
+    const waveFrequency = 0.008;
+    const waveSpeed = 0.3;
     
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
     }
     
+    // Simplex-style noise approximation for organic movement
+    function noise(x, y, t) {
+        const n1 = Math.sin(x * 0.01 + t) * Math.cos(y * 0.012 + t * 0.7);
+        const n2 = Math.sin(x * 0.008 - t * 0.5) * Math.sin(y * 0.009 + t * 0.4);
+        const n3 = Math.cos(x * 0.015 + t * 0.3) * Math.sin(y * 0.011 - t * 0.6);
+        return (n1 + n2 + n3) / 3;
+    }
+    
+    function getWaveOffset(x, y, t, isVertical) {
+        // Multiple wave layers for organic feel
+        let offset = 0;
+        
+        // Primary slow wave
+        offset += Math.sin((isVertical ? y : x) * waveFrequency + t * waveSpeed) * waveAmplitude;
+        
+        // Secondary faster, smaller wave
+        offset += Math.sin((isVertical ? y : x) * waveFrequency * 2.3 - t * waveSpeed * 1.4) * (waveAmplitude * 0.4);
+        
+        // Tertiary noise for irregularity
+        offset += noise(x, y, t) * (waveAmplitude * 0.6);
+        
+        return offset;
+    }
+    
     function drawGrid() {
         ctx.clearRect(0, 0, width, height);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
         ctx.lineWidth = 1;
+        
+        time += 0.016;
         
         // Smooth mouse follow
         mouseX += (targetMouseX - mouseX) * 0.1;
@@ -551,15 +583,18 @@ function initGridCanvas() {
         // Draw vertical lines
         for (let x = 0; x <= width; x += gridSize) {
             ctx.beginPath();
-            for (let y = 0; y <= height; y += 5) {
+            for (let y = 0; y <= height; y += 8) {
                 const dx = x - mouseX;
                 const dy = y - mouseY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                let offsetX = 0;
+                // Organic wave offset
+                let offsetX = getWaveOffset(x, y, time, true);
+                
+                // Add cursor distortion on top
                 if (distance < distortRadius) {
                     const force = (1 - distance / distortRadius) * distortStrength;
-                    offsetX = (dx / distance) * force || 0;
+                    offsetX += (dx / distance) * force || 0;
                 }
                 
                 if (y === 0) {
@@ -574,15 +609,18 @@ function initGridCanvas() {
         // Draw horizontal lines
         for (let y = 0; y <= height; y += gridSize) {
             ctx.beginPath();
-            for (let x = 0; x <= width; x += 5) {
+            for (let x = 0; x <= width; x += 8) {
                 const dx = x - mouseX;
                 const dy = y - mouseY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                let offsetY = 0;
+                // Organic wave offset
+                let offsetY = getWaveOffset(x, y, time, false);
+                
+                // Add cursor distortion on top
                 if (distance < distortRadius) {
                     const force = (1 - distance / distortRadius) * distortStrength;
-                    offsetY = (dy / distance) * force || 0;
+                    offsetY += (dy / distance) * force || 0;
                 }
                 
                 if (x === 0) {
