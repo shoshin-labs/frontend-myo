@@ -1031,24 +1031,34 @@ section {
     transition-delay: 1s;
 }
 
-.statement-strike {
+.statement-evil {
     position: relative;
+    color: #666;
+    transition: all 0.5s ease;
 }
 
-.statement-strike::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 0;
-    height: 3px;
-    background: var(--color-accent);
-    transition: width 0.5s ease-out;
-    transition-delay: 0.7s;
+[data-statement-animate].animate-in .statement-evil {
+    color: #aa0000;
+    text-shadow: 
+        0 0 10px rgba(255, 0, 0, 0.5),
+        0 0 20px rgba(255, 0, 0, 0.3),
+        0 0 40px rgba(255, 0, 0, 0.2);
+    animation: evilPulse 2s ease-in-out infinite;
 }
 
-[data-statement-animate].animate-in .statement-strike::after {
-    width: 100%;
+@keyframes evilPulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 10px rgba(255, 0, 0, 0.5),
+            0 0 20px rgba(255, 0, 0, 0.3),
+            0 0 40px rgba(255, 0, 0, 0.2);
+    }
+    50% {
+        text-shadow: 
+            0 0 15px rgba(255, 0, 0, 0.7),
+            0 0 30px rgba(255, 0, 0, 0.5),
+            0 0 60px rgba(255, 0, 0, 0.3);
+    }
 }
 
 [data-statement-animate].animate-in .statement-main {
