@@ -950,6 +950,25 @@ section {
     justify-content: center;
     overflow: hidden;
     background: var(--color-bg);
+    /* Subtle vignette effect */
+    background: radial-gradient(ellipse at center, var(--color-bg) 0%, #050505 100%);
+}
+
+.difference-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(ellipse 80% 50% at 50% 50%, rgba(255, 61, 0, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 30% 60%, rgba(255, 61, 0, 0.02) 0%, transparent 40%),
+        radial-gradient(ellipse 60% 40% at 70% 40%, rgba(255, 61, 0, 0.02) 0%, transparent 40%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+}
+
+[data-statement-animate].animate-in::before {
+    opacity: 1;
 }
 
 .difference-canvas {
@@ -957,9 +976,10 @@ section {
     inset: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    pointer-events: all;
     opacity: 0;
-    transition: opacity 1s ease;
+    transition: opacity 1.2s ease;
+    cursor: crosshair;
 }
 
 [data-statement-animate].animate-in .difference-canvas {
@@ -997,12 +1017,147 @@ section {
 
 .difference-content .statement-main {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-size: clamp(2rem, 6vw, 4rem);
     font-weight: 700;
     letter-spacing: -0.03em;
-    color: var(--color-text);
     line-height: 1.1;
-    margin-top: var(--space-sm);
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25em;
+    flex-wrap: wrap;
+}
+
+/* Individual word styling */
+.statement-word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+    filter: blur(8px);
+    color: var(--color-text);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The aside underneath */
+.statement-aside {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    margin-top: var(--space-lg);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-statement-animate].animate-in .statement-aside {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 2.2s;
+}
+
+/* Staggered word reveal */
+[data-statement-animate].animate-in .statement-word {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+
+[data-statement-animate].animate-in .statement-word:nth-child(1) { transition-delay: 1s; }
+[data-statement-animate].animate-in .statement-word:nth-child(2) { transition-delay: 1.15s; }
+[data-statement-animate].animate-in .statement-word:nth-child(3) { transition-delay: 1.3s; }
+[data-statement-animate].animate-in .statement-word:nth-child(4) { transition-delay: 1.5s; }
+[data-statement-animate].animate-in .statement-word:nth-child(5) { transition-delay: 1.7s; }
+
+/* "Freedom" gets the hero treatment */
+.statement-freedom {
+    position: relative;
+    background: linear-gradient(
+        90deg,
+        #fff 0%,
+        #FF3D00 25%,
+        #FF6B35 50%,
+        #FF3D00 75%,
+        #fff 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: none;
+}
+
+[data-statement-animate].animate-in .statement-freedom {
+    animation: gradientFlow 3s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+@keyframes gradientFlow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Glowing underline for freedom */
+.freedom-underline {
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #FF3D00, #FF6B35, #FF3D00, transparent);
+    border-radius: 2px;
+    box-shadow: 
+        0 0 10px rgba(255, 61, 0, 0.8),
+        0 0 20px rgba(255, 61, 0, 0.5),
+        0 0 40px rgba(255, 61, 0, 0.3);
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-statement-animate].animate-in .freedom-underline {
+    width: 100%;
+    transition-delay: 1.8s;
+}
+
+/* Floating animation for the whole statement */
+[data-statement-animate].animate-in .statement-main {
+    animation: statementFloat 4s ease-in-out infinite;
+    animation-delay: 2.5s;
+}
+
+@keyframes statementFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* Glow pulse on "freedom" */
+[data-statement-animate].animate-in .statement-freedom {
+    text-shadow: 
+        0 0 20px rgba(255, 61, 0, 0.4),
+        0 0 40px rgba(255, 61, 0, 0.2),
+        0 0 60px rgba(255, 61, 0, 0.1);
+    -webkit-text-fill-color: transparent;
+}
+
+/* Hover interaction */
+.statement-freedom:hover {
+    animation: gradientFlow 1s ease-in-out infinite !important;
+}
+
+.statement-freedom:hover .freedom-underline {
+    box-shadow: 
+        0 0 15px rgba(255, 61, 0, 1),
+        0 0 30px rgba(255, 61, 0, 0.7),
+        0 0 60px rgba(255, 61, 0, 0.4);
 }
 
 /* Statement Animation */
@@ -1062,22 +1217,7 @@ section {
     }
 }
 
-[data-statement-animate].animate-in .statement-main {
-    animation: statementReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s both;
-}
-
-@keyframes statementReveal {
-    0% {
-        opacity: 0;
-        transform: translateY(40px) scale(0.95);
-        filter: blur(4px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-}
+/* Statement reveal now handled by individual word animations */
 
 /* ============================================
    Ownership CTA
@@ -1693,6 +1833,17 @@ section {
     
     .difference-content .statement-main {
         font-size: 1.5rem;
+        gap: 0.2em;
+    }
+    
+    .freedom-underline {
+        height: 2px;
+        bottom: -2px;
+    }
+    
+    .statement-aside {
+        font-size: 0.65rem;
+        margin-top: var(--space-md);
     }
     
     .difference-content .statement-contrast {
