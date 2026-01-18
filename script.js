@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize everything behind the loader
     initGridCanvas();
+    initHeroNetwork();
     initRevealAnimations();
     initSmoothScroll();
     initNavScroll();
@@ -59,6 +60,459 @@ function hideLoader() {
             setTimeout(() => loader.remove(), 400);
         }, minLoadTime);
     }
+}
+
+/**
+ * Hero Network Visualization
+ * Grid-aligned lines with data pulses and click ripple effect
+ */
+function initHeroNetwork() {
+    const canvas = document.getElementById('heroNetworkCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const hero = document.querySelector('.hero');
+    let width, height;
+    let animationId;
+    
+    // Grid matches the background grid
+    const gridSize = 40;
+    
+    // Network configuration
+    const nodes = [];
+    const connections = [];
+    const pulses = [];
+    const ripples = [];
+    
+    function resize() {
+        const rect = hero.getBoundingClientRect();
+        width = canvas.width = rect.width;
+        height = canvas.height = rect.height;
+        initNetwork();
+    }
+    
+    function snapToGrid(value) {
+        return Math.round(value / gridSize) * gridSize;
+    }
+    
+    function initNetwork() {
+        nodes.length = 0;
+        connections.length = 0;
+        
+        // Text content is on the left, so exclusion zone shifted left
+        const textCenterX = width * 0.35;
+        const textCenterY = height * 0.5;
+        const exclusionW = width * 0.45;
+        const exclusionH = height * 0.35;
+        
+        function isInExclusion(x, y) {
+            return x > textCenterX - exclusionW * 0.5 && 
+                   x < textCenterX + exclusionW * 0.5 &&
+                   y > textCenterY - exclusionH * 0.5 && 
+                   y < textCenterY + exclusionH * 0.5;
+        }
+        
+        // Create a denser grid of nodes
+        const positions = [];
+        
+        // Top area - full width
+        for (let x = gridSize; x < width - gridSize; x += gridSize * 2) {
+            const y = snapToGrid(height * 0.08);
+            positions.push({ x: snapToGrid(x), y });
+        }
+        
+        // Upper row
+        for (let x = gridSize * 2; x < width - gridSize * 2; x += gridSize * 2) {
+            const y = snapToGrid(height * 0.18);
+            if (!isInExclusion(x, y)) {
+                positions.push({ x: snapToGrid(x), y });
+            }
+        }
+        
+        // Mid-upper
+        for (let x = gridSize * 2; x < width - gridSize * 2; x += gridSize * 2.5) {
+            const y = snapToGrid(height * 0.32);
+            if (!isInExclusion(x, y)) {
+                positions.push({ x: snapToGrid(x), y });
+            }
+        }
+        
+        // Mid-lower
+        for (let x = gridSize * 2; x < width - gridSize * 2; x += gridSize * 2.5) {
+            const y = snapToGrid(height * 0.68);
+            if (!isInExclusion(x, y)) {
+                positions.push({ x: snapToGrid(x), y });
+            }
+        }
+        
+        // Lower row
+        for (let x = gridSize * 2; x < width - gridSize * 2; x += gridSize * 2) {
+            const y = snapToGrid(height * 0.82);
+            if (!isInExclusion(x, y)) {
+                positions.push({ x: snapToGrid(x), y });
+            }
+        }
+        
+        // Bottom area - full width
+        for (let x = gridSize; x < width - gridSize; x += gridSize * 2) {
+            const y = snapToGrid(height * 0.92);
+            positions.push({ x: snapToGrid(x), y });
+        }
+        
+        // Left edge
+        for (let y = gridSize * 2; y < height - gridSize * 2; y += gridSize * 1.5) {
+            positions.push({ x: snapToGrid(width * 0.03), y: snapToGrid(y) });
+        }
+        
+        // Right side - more nodes since it's open
+        for (let y = gridSize * 2; y < height - gridSize * 2; y += gridSize * 1.2) {
+            positions.push({ x: snapToGrid(width * 0.97), y: snapToGrid(y) });
+            positions.push({ x: snapToGrid(width * 0.88), y: snapToGrid(y) });
+            positions.push({ x: snapToGrid(width * 0.78), y: snapToGrid(y) });
+        }
+        
+        // Interior points - mostly on the right where there's space
+        const interiorPoints = [
+            // Right side cluster
+            { x: 0.65, y: 0.25 }, { x: 0.72, y: 0.35 },
+            { x: 0.68, y: 0.45 }, { x: 0.75, y: 0.5 },
+            { x: 0.7, y: 0.55 }, { x: 0.65, y: 0.65 },
+            { x: 0.72, y: 0.75 }, { x: 0.68, y: 0.4 },
+            // Top and bottom (avoiding text area)
+            { x: 0.4, y: 0.12 }, { x: 0.5, y: 0.1 },
+            { x: 0.4, y: 0.88 }, { x: 0.5, y: 0.9 },
+        ];
+        
+        interiorPoints.forEach(p => {
+            const x = snapToGrid(width * p.x);
+            const y = snapToGrid(height * p.y);
+            if (!isInExclusion(x, y)) {
+                positions.push({ x, y });
+            }
+        });
+        
+        // Deduplicate positions
+        const seen = new Set();
+        positions.forEach(pos => {
+            const key = `${pos.x},${pos.y}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                nodes.push({ x: pos.x, y: pos.y });
+            }
+        });
+        
+        // Create connections with extended range
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            
+            for (let j = i + 1; j < nodes.length; j++) {
+                const other = nodes[j];
+                const dx = Math.abs(node.x - other.x);
+                const dy = Math.abs(node.y - other.y);
+                
+                // Horizontal connections
+                const isHorizontal = dy === 0 && dx > 0 && dx <= gridSize * 8;
+                // Vertical connections
+                const isVertical = dx === 0 && dy > 0 && dy <= gridSize * 5;
+                // Diagonal connections (45 degrees)
+                const isDiagonal = Math.abs(dx - dy) < 5 && dx <= gridSize * 4 && dx > 0;
+                
+                if (isHorizontal || isVertical || isDiagonal) {
+                    const midX = (node.x + other.x) / 2;
+                    const midY = (node.y + other.y) / 2;
+                    
+                    // Don't draw lines through the text area
+                    if (!isInExclusion(midX, midY)) {
+                        connections.push({
+                            from: i,
+                            to: j,
+                            opacity: 0.02 + Math.random() * 0.03
+                        });
+                    }
+                }
+            }
+        }
+        
+        // Add long spanning lines along edges
+        const leftNodes = nodes.filter(n => n.x < width * 0.15).sort((a, b) => a.y - b.y);
+        const rightNodes = nodes.filter(n => n.x > width * 0.85).sort((a, b) => a.y - b.y);
+        const topNodes = nodes.filter(n => n.y < height * 0.2).sort((a, b) => a.x - b.x);
+        const bottomNodes = nodes.filter(n => n.y > height * 0.8).sort((a, b) => a.x - b.x);
+        
+        // Connect sequential nodes on edges
+        [leftNodes, rightNodes, topNodes, bottomNodes].forEach(edgeNodes => {
+            for (let i = 0; i < edgeNodes.length - 1; i++) {
+                const fromIdx = nodes.indexOf(edgeNodes[i]);
+                const toIdx = nodes.indexOf(edgeNodes[i + 1]);
+                if (fromIdx !== -1 && toIdx !== -1) {
+                    const exists = connections.some(c => 
+                        (c.from === fromIdx && c.to === toIdx) || (c.from === toIdx && c.to === fromIdx)
+                    );
+                    if (!exists) {
+                        connections.push({ from: fromIdx, to: toIdx, opacity: 0.025 });
+                    }
+                }
+            }
+        });
+    }
+    
+    function spawnPulse(fromNode = null) {
+        if (connections.length === 0) return;
+        
+        let conn;
+        if (fromNode !== null) {
+            // Find connections from this node
+            const nodeConns = connections.filter(c => c.from === fromNode || c.to === fromNode);
+            if (nodeConns.length > 0) {
+                conn = nodeConns[Math.floor(Math.random() * nodeConns.length)];
+            } else {
+                conn = connections[Math.floor(Math.random() * connections.length)];
+            }
+        } else {
+            conn = connections[Math.floor(Math.random() * connections.length)];
+        }
+        
+        const reverse = fromNode !== null ? conn.to === fromNode : Math.random() > 0.5;
+        
+        pulses.push({
+            connection: conn,
+            progress: 0,
+            speed: 0.005 + Math.random() * 0.007,
+            reverse,
+            opacity: 0.4 + Math.random() * 0.35
+        });
+    }
+    
+    function spawnRipple(x, y) {
+        // Snap click to grid
+        const gridX = snapToGrid(x);
+        const gridY = snapToGrid(y);
+        
+        ripples.push({
+            x: gridX,
+            y: gridY,
+            radius: 0,
+            maxRadius: Math.max(width, height) * 0.6,
+            speed: 4,
+            opacity: 0.4
+        });
+        
+        // Spawn pulses from nearby nodes
+        const nearbyNodes = nodes
+            .map((n, i) => ({ node: n, index: i, dist: Math.sqrt(Math.pow(n.x - gridX, 2) + Math.pow(n.y - gridY, 2)) }))
+            .filter(n => n.dist < 200)
+            .sort((a, b) => a.dist - b.dist)
+            .slice(0, 5);
+        
+        nearbyNodes.forEach((n, i) => {
+            setTimeout(() => spawnPulse(n.index), i * 50);
+        });
+    }
+    
+    function drawConnection(conn, rippleBoost = 0) {
+        const from = nodes[conn.from];
+        const to = nodes[conn.to];
+        
+        const opacity = Math.min(0.15, conn.opacity + rippleBoost);
+        
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.strokeStyle = `rgba(255, 61, 0, ${opacity})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+    
+    function drawPulse(pulse) {
+        const conn = pulse.connection;
+        const from = nodes[conn.from];
+        const to = nodes[conn.to];
+        
+        const startNode = pulse.reverse ? to : from;
+        const endNode = pulse.reverse ? from : to;
+        
+        const x = startNode.x + (endNode.x - startNode.x) * pulse.progress;
+        const y = startNode.y + (endNode.y - startNode.y) * pulse.progress;
+        
+        const trailLength = 0.25;
+        const trailStart = Math.max(0, pulse.progress - trailLength);
+        
+        const startX = startNode.x + (endNode.x - startNode.x) * trailStart;
+        const startY = startNode.y + (endNode.y - startNode.y) * trailStart;
+        
+        const gradient = ctx.createLinearGradient(startX, startY, x, y);
+        gradient.addColorStop(0, 'rgba(255, 61, 0, 0)');
+        gradient.addColorStop(0.6, `rgba(255, 80, 40, ${pulse.opacity * 0.5})`);
+        gradient.addColorStop(1, `rgba(255, 120, 70, ${pulse.opacity})`);
+        
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+    }
+    
+    function drawRipple(ripple) {
+        // Draw expanding grid-aligned ripple
+        ctx.save();
+        
+        // Horizontal lines of ripple
+        const lineSpacing = gridSize;
+        const rippleWidth = 3;
+        
+        for (let offset = -ripple.radius; offset <= ripple.radius; offset += lineSpacing) {
+            const y = ripple.y + offset;
+            if (y < 0 || y > height) continue;
+            
+            // Calculate horizontal extent at this y level
+            const distFromCenter = Math.abs(offset);
+            const horizontalExtent = Math.sqrt(Math.max(0, ripple.radius * ripple.radius - distFromCenter * distFromCenter));
+            
+            if (horizontalExtent > 0) {
+                // Fade based on distance from ripple edge
+                const edgeDist = ripple.radius - Math.sqrt(offset * offset);
+                const fadeZone = 40;
+                const edgeFade = Math.max(0, Math.min(1, (fadeZone - Math.abs(edgeDist - ripple.radius + fadeZone)) / fadeZone));
+                
+                const opacity = ripple.opacity * edgeFade * (1 - ripple.radius / ripple.maxRadius);
+                
+                if (opacity > 0.01) {
+                    ctx.beginPath();
+                    ctx.moveTo(Math.max(0, ripple.x - horizontalExtent), y);
+                    ctx.lineTo(Math.min(width, ripple.x + horizontalExtent), y);
+                    ctx.strokeStyle = `rgba(255, 61, 0, ${opacity * 0.3})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        // Vertical lines of ripple
+        for (let offset = -ripple.radius; offset <= ripple.radius; offset += lineSpacing) {
+            const x = ripple.x + offset;
+            if (x < 0 || x > width) continue;
+            
+            const distFromCenter = Math.abs(offset);
+            const verticalExtent = Math.sqrt(Math.max(0, ripple.radius * ripple.radius - distFromCenter * distFromCenter));
+            
+            if (verticalExtent > 0) {
+                const edgeDist = ripple.radius - Math.sqrt(offset * offset);
+                const fadeZone = 40;
+                const edgeFade = Math.max(0, Math.min(1, (fadeZone - Math.abs(edgeDist - ripple.radius + fadeZone)) / fadeZone));
+                
+                const opacity = ripple.opacity * edgeFade * (1 - ripple.radius / ripple.maxRadius);
+                
+                if (opacity > 0.01) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, Math.max(0, ripple.y - verticalExtent));
+                    ctx.lineTo(x, Math.min(height, ripple.y + verticalExtent));
+                    ctx.strokeStyle = `rgba(255, 61, 0, ${opacity * 0.3})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        ctx.restore();
+    }
+    
+    function getConnectionRippleBoost(conn) {
+        let boost = 0;
+        const from = nodes[conn.from];
+        const to = nodes[conn.to];
+        const midX = (from.x + to.x) / 2;
+        const midY = (from.y + to.y) / 2;
+        
+        ripples.forEach(ripple => {
+            const dist = Math.sqrt(Math.pow(midX - ripple.x, 2) + Math.pow(midY - ripple.y, 2));
+            const rippleEdge = ripple.radius;
+            const edgeWidth = 60;
+            
+            if (Math.abs(dist - rippleEdge) < edgeWidth) {
+                const intensity = 1 - Math.abs(dist - rippleEdge) / edgeWidth;
+                const fade = 1 - ripple.radius / ripple.maxRadius;
+                boost += intensity * fade * 0.08;
+            }
+        });
+        
+        return boost;
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        
+        // Update and draw ripples first (behind everything)
+        for (let i = ripples.length - 1; i >= 0; i--) {
+            const ripple = ripples[i];
+            ripple.radius += ripple.speed;
+            
+            if (ripple.radius >= ripple.maxRadius) {
+                ripples.splice(i, 1);
+            } else {
+                drawRipple(ripple);
+            }
+        }
+        
+        // Draw connections with ripple boost
+        connections.forEach(conn => {
+            const boost = getConnectionRippleBoost(conn);
+            drawConnection(conn, boost);
+        });
+        
+        // Draw and update pulses
+        for (let i = pulses.length - 1; i >= 0; i--) {
+            const pulse = pulses[i];
+            pulse.progress += pulse.speed;
+            
+            if (pulse.progress >= 1) {
+                pulses.splice(i, 1);
+            } else {
+                drawPulse(pulse);
+            }
+        }
+        
+        // Spawn new pulses occasionally
+        if (Math.random() < 0.025) {
+            spawnPulse();
+        }
+        
+        animationId = requestAnimationFrame(animate);
+    }
+    
+    // Click handler for ripple effect
+    canvas.style.pointerEvents = 'auto';
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        spawnRipple(x, y);
+    });
+    
+    // Only animate when hero is visible
+    const visibilityObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (!animationId) animate();
+            } else {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            }
+        });
+    }, { threshold: 0 });
+    
+    visibilityObserver.observe(hero);
+    
+    window.addEventListener('resize', resize);
+    resize();
+    
+    // Initial pulses
+    setTimeout(() => spawnPulse(), 800);
+    setTimeout(() => spawnPulse(), 1500);
+    setTimeout(() => spawnPulse(), 2200);
 }
 
 /**

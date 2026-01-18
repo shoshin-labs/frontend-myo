@@ -315,6 +315,38 @@ body.loaded .scroll-indicator {
     padding: var(--space-3xl) var(--space-xl);
     position: relative;
     z-index: 2;
+    overflow: hidden;
+}
+
+/* ============================================
+   Hero Network Visualization
+   ============================================ */
+
+.hero-network {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+#heroNetworkCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+    cursor: crosshair;
+}
+
+body.loaded #heroNetworkCanvas {
+    opacity: 1;
+}
+
+/* Hide network on mobile */
+@media (max-width: 768px) {
+    .hero-network {
+        display: none;
+    }
 }
 
 .hero-content {
