@@ -457,6 +457,11 @@ body.loaded #heroNetworkCanvas {
     position: relative;
 }
 
+.hero-sub .highlight {
+    color: var(--color-accent);
+    font-weight: 500;
+}
+
 .hero-line .highlight::before {
     content: '';
     position: absolute;
