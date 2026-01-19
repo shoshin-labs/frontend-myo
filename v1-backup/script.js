@@ -1,5 +1,5 @@
 /**
- * Myo Labs — Interactive Scripts
+ * Myo Labs. Interactive Scripts
  * Gentle, organic interactions
  */
 

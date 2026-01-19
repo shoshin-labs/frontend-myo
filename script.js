@@ -1,5 +1,5 @@
 /**
- * Myo Labs — Neo-Brutalist Interactive Scripts
+ * Myo Labs. Neo-Brutalist Interactive Scripts
  * Raw. Responsive. Alive.
  */
 
