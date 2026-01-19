@@ -1,10 +1,10 @@
 /* ============================================
-   Myo Labs — Neo-Brutalist Redesign
+   Myo Labs. Neo-Brutalist Redesign
    Raw. Bold. Unapologetic.
    ============================================ */
 
 :root {
-    /* Colors — stark, high contrast */
+    /* Colors. stark, high contrast */
     --color-bg: #0A0A0A;
     --color-bg-elevated: #111111;
     --color-bg-card: #161616;
@@ -455,6 +455,15 @@ body.loaded #heroNetworkCanvas {
 .hero-line .highlight {
     color: var(--color-text);
     position: relative;
+}
+
+.hero-line .highlight-orange {
+    color: var(--color-accent);
+}
+
+.hero-sub .highlight {
+    color: var(--color-accent);
+    font-weight: 500;
 }
 
 .hero-line .highlight::before {
@@ -1478,10 +1487,10 @@ section {
     width: 400px;
     height: 400px;
     background: 
-        linear-gradient(90deg, var(--color-border) 1px, transparent 1px),
-        linear-gradient(var(--color-border) 1px, transparent 1px);
+        linear-gradient(90deg, var(--color-accent) 1px, transparent 1px),
+        linear-gradient(var(--color-accent) 1px, transparent 1px);
     background-size: 40px 40px;
-    opacity: 0.3;
+    opacity: 0.25;
     mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
     -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
 }
